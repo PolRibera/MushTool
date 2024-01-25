@@ -64,7 +64,10 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                         Text("Mushtool", modifier = Modifier.padding(10.dp).align(Alignment.CenterVertically), color = Color.White) // Texto que se muestra en la esquina izquierda // Texto que se muestra en la esquina izquierda
 
                         Button(
-                            onClick = { /* TODO: Acción del botón */ },
+                            onClick = {
+                                val intentConfig = Intent(context, ConfigActivity::class.java)
+                                context.startActivity(intentConfig)
+                            },
                             modifier = Modifier
                                  // Tamaño del botón
                                 .align(Alignment.CenterVertically)
@@ -192,7 +195,8 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Button(
-                            onClick = { /* TODO: Acción del botón */ },
+                            onClick = {  val intentPLats = Intent(context, MensajesActivity::class.java)
+                                context.startActivity(intentPLats)},
                             modifier = Modifier
                                 .padding(10.dp)
                                 .size(240.dp, 100.dp)
@@ -210,7 +214,8 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Button(
-                            onClick = { /* TODO: Acción del botón */ },
+                            onClick = {  val intentPLats = Intent(context, FotosActivity::class.java)
+                                context.startActivity(intentPLats) },
                             modifier = Modifier
                                 .padding(10.dp)
                                 .size(240.dp, 100.dp)

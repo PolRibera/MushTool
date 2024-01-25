@@ -36,6 +36,18 @@
         <activity
             android:name=".PlatsActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".ConfigActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".MensajesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".FotosActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
