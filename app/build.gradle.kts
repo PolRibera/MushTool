@@ -77,7 +77,10 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
-
+    implementation("androidx.camera:camera-camera2:1.1.0-alpha10")
+    implementation("androidx.camera:camera-lifecycle:1.1.0-alpha10")
+    implementation("androidx.camera:camera-view:1.0.0-alpha31")
+    implementation("androidx.camera:camera-extensions:1.0.0-alpha31")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
