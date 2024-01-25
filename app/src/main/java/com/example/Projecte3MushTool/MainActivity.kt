@@ -1,5 +1,7 @@
 package com.example.lemonade
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -25,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,7 +39,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                LemonadeApp()
+                LemonadeApp(this)
             }
         }
     }
@@ -46,7 +48,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LemonadeApp() { // Define el color de los botones aquí
+fun LemonadeApp(context: Context) { // Define el color de los botones aquí
 
     Scaffold(
         topBar = {
@@ -96,7 +98,10 @@ fun LemonadeApp() { // Define el color de los botones aquí
                         modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
                     ) {
                         Button(
-                            onClick = { /* TODO: Acción del botón */ },
+                            onClick = {
+                                val intentBus = Intent(context, BusquedaActivity::class.java)
+                                context.startActivity(intentBus)
+                            },
                             modifier = Modifier
                                 .background(Color(0xFF6B0C0C))
                                 .fillMaxHeight(),// Tamaño cuadrado del botón
@@ -114,7 +119,8 @@ fun LemonadeApp() { // Define el color de los botones aquí
                         modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
                     ) {
                         Button(
-                            onClick = { /* TODO: Acción del botón */ },
+                            onClick = { val intentMapa = Intent(context, MapaActivity::class.java)
+                                context.startActivity(intentMapa) },
                             modifier = Modifier
                                 .background(Color(0xFF6B0C0C))
                                 .fillMaxHeight(),// Tamaño cuadrado del botón
@@ -133,7 +139,8 @@ fun LemonadeApp() { // Define el color de los botones aquí
                         modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
                     ) {
                         Button(
-                            onClick = { /* TODO: Acción del botón */ },
+                            onClick = { val intentLearn = Intent(context, LearnActivity::class.java)
+                                context.startActivity(intentLearn) },
                             modifier = Modifier
                                 .background(Color(0xFF6B0C0C))
                                 .fillMaxHeight(),// Tamaño cuadrado del botón
@@ -152,7 +159,8 @@ fun LemonadeApp() { // Define el color de los botones aquí
                         modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
                     ) {
                         Button(
-                            onClick = { /* TODO: Acción del botón */ },
+                            onClick = { val intentPLats = Intent(context, PlatsActivity::class.java)
+                                context.startActivity(intentPLats) },
                             modifier = Modifier
                                 .background(Color(0xFF6B0C0C))
                                 .fillMaxHeight() // Tamaño cuadrado del botón // Agrega espacio alrededor del botón
@@ -218,10 +226,13 @@ fun LemonadeApp() { // Define el color de los botones aquí
         }
     }
 }
+
+
+
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     AppTheme {
-        LemonadeApp()
+        LemonadeApp(LocalContext.current)
     }
 }

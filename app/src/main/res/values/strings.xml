@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 <resources>
-    <string name="app_name">Lemonade</string>
+    <string name="app_name">MushTool</string>
     <string name="lemon_select">Tap the lemon tree to select a lemon</string>
     <string name="lemon_squeeze">Keep tapping the lemon to squeeze it</string>
     <string name="lemon_drink">Tap the lemonade to drink it</string>
