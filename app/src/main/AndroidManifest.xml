@@ -21,11 +21,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".BusquedaActivity"
+            android:name=".CrearSetaActivity"
             android:exported="false" />
 
-        <activity
-            android:name=".CrearSetaActivity"
+        <activity android:name=".EditarSetaActivity"
             android:exported="false" />
 
         <activity
@@ -53,6 +52,9 @@
             android:exported="false"
 
             />
+        <activity
+            android:name=".BusquedaActivity"
+            android:exported="false" />
 
     </application>
 
