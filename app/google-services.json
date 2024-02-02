@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "179972010241",
+    "firebase_url": "https://mushtool-grup-pjp-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "mushtool-grup-pjp",
+    "storage_bucket": "mushtool-grup-pjp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:179972010241:android:2bfbb3f04f2c4f21be6b00",
+        "android_client_info": {
+          "package_name": "com.example.Projecte3MushTool"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZHtDB6yrTEwugtCwwWlBq7XVqbB5PwXI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

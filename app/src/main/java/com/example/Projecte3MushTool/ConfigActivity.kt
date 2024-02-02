@@ -1,4 +1,4 @@
-package com.example.lemonade
+package com.example.Projecte3MushTool
 
 import android.content.Context
 import android.content.Intent
@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+
 import com.example.lemonade.ui.theme.AppTheme
 
 class ConfigActivity : ComponentActivity() {

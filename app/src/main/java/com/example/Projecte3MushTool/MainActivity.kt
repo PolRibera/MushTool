@@ -1,4 +1,4 @@
-package com.example.lemonade
+package com.example.Projecte3MushTool
 
 import android.content.Context
 import android.content.Intent
@@ -104,6 +104,7 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                             onClick = {
                                 val intentBus = Intent(context, BusquedaActivity::class.java)
                                 context.startActivity(intentBus)
+
                             },
                             modifier = Modifier
                                 .background(Color(0xFF6B0C0C))

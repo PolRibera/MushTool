@@ -1,4 +1,4 @@
-package com.example.lemonade
+package com.example.Projecte3MushTool
 
 import android.content.Context
 import android.content.Intent

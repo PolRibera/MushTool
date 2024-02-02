@@ -17,14 +17,15 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "com.example.lemonade"
+    namespace = "com.example.Projecte3MushTool"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.lemonade"
+        applicationId = "com.example.Projecte3MushTool"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
@@ -81,6 +82,9 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:1.1.0-alpha10")
     implementation("androidx.camera:camera-view:1.0.0-alpha31")
     implementation("androidx.camera:camera-extensions:1.0.0-alpha31")
+    implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
+    implementation("com.google.firebase:firebase-analytics")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation("com.google.firebase:firebase-database-ktx")
 }

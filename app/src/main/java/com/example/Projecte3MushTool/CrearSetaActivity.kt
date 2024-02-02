@@ -1,6 +1,5 @@
 package com.example.Projecte3MushTool
 
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -15,13 +14,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -29,10 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,13 +34,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lemonade.ui.theme.AppTheme
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 
-class BusquedaActivity : ComponentActivity() {
+class CrearSetaActivity : ComponentActivity() {
     private lateinit var Boletreference: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,48 +48,32 @@ class BusquedaActivity : ComponentActivity() {
 
         setContent {
             AppTheme {
-                BusquedaApp(this)
+                CrearSetaApp(this)
             }
         }
     }
 
     // Esta función crea una nueva seta en la base de datos
-
-
-    @Composable
-    fun BusquedaApp(context: Context) {
-        val setasState = remember { mutableStateOf<List<Seta>>(emptyList()) }
-
-        LaunchedEffect(true) {
-            val setas = mutableListOf<Seta>()
-
-            Boletreference.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val newSetas = mutableListOf<Seta>()
-
-                    for (setaSnapshot in dataSnapshot.children) {
-                        val img_path = setaSnapshot.child("img_path").getValue(String::class.java)
-                        val name = setaSnapshot.child("name").getValue(String::class.java)
-                        val sci_name = setaSnapshot.child("sci_name").getValue(String::class.java)
-                        val warn_level = setaSnapshot.child("warn_level").getValue(Int::class.java)
-
-                        if (img_path != null && name != null && sci_name != null && warn_level != null) {
-                            val seta = Seta(img_path, name, sci_name, warn_level)
-                            newSetas.add(seta)
-                        }
-                    }
-                    setasState.value = newSetas
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
-                    // Handle possible errors.
-                }
-            })
+    fun crearNuevaSeta(img_path: String, name: String, sci_name: String, warn_level: Int) {
+        val seta = Seta(img_path, name, sci_name, warn_level)
+        Boletreference.child(sci_name).setValue(seta)
+            .addOnSuccessListener {
+            Toast.makeText(this, "Seta añadida correctamente", Toast.LENGTH_SHORT).show()
+        }.addOnFailureListener {
+            Toast.makeText(this, "Error al añadir la seta", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun CrearSetaApp(context: Context) {
+        val imgPathState =  remember { mutableStateOf("") }
+        val nameState =  remember { mutableStateOf("") }
+        val sciNameState =  remember { mutableStateOf("") }
+        val warnLevelState = remember  { mutableStateOf(0) }
 
         Scaffold(
             topBar = {
-                @OptIn(ExperimentalMaterial3Api::class)
                 TopAppBar(
                     modifier = Modifier.background(Color(0xFF6B0C0C)),
                     title = { },
@@ -139,13 +113,62 @@ class BusquedaActivity : ComponentActivity() {
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    LazyColumn {
-                        items(setasState.value) { seta ->
-                            Text(text = seta.sci_name)
-                            Text(text = seta.name)
-                            Text(text = ""+seta.warn_level+"")
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
+                    // Campo de entrada para la imagen de la seta
+                    // Aquí puedes implementar la lógica para seleccionar la imagen
+                    // por medio de un diálogo de selección de imágenes, etc.
+                    // Actualmente es un campo de texto simple.
+                    TextField(
+                        value = imgPathState.value,
+                        onValueChange = { imgPathState.value = it },
+                        label = { Text("Ruta de la imagen") }
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Campo de entrada para el nombre de la seta
+                    TextField(
+                        value = nameState.value,
+                        onValueChange = { nameState.value = it },
+                        label = { Text("Nombre de la seta") }
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Campo de entrada para el nombre científico de la seta
+                    TextField(
+                        value = sciNameState.value,
+                        onValueChange = { sciNameState.value = it },
+                        label = { Text("Nombre científico de la seta") }
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Campo de entrada para el nivel de advertencia de la seta
+                    // Aquí puedes usar un control deslizante u otro widget apropiado
+                    // dependiendo de cómo quieras manejar el nivel de advertencia.
+                    // Este ejemplo usa un campo de entrada de texto simple.
+                    TextField(
+                        value = warnLevelState.value.toString(),
+                        onValueChange = {
+                            // Manejar la conversión de String a Int de manera segura
+                            warnLevelState.value = it.toIntOrNull() ?: 0
+                        },
+                        label = { Text("Nivel de advertencia (0-3)") }
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Botón para enviar el formulario y crear la nueva seta
+                    Button(
+                        onClick = {
+                            // Llamar a la función para crear una nueva seta
+                            crearNuevaSeta(imgPathState.value, nameState.value, sciNameState.value, warnLevelState.value)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFF6B0C0C))
+                    ) {
+                        Text("Crear nueva seta", color = Color.White)
                     }
                 }
             }
@@ -156,7 +179,7 @@ class BusquedaActivity : ComponentActivity() {
     @Composable
     fun DefaultPreview() {
         AppTheme {
-            BusquedaApp(LocalContext.current)
+            CrearSetaApp(LocalContext.current)
         }
     }
 }
