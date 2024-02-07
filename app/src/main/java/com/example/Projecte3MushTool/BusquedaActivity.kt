@@ -63,13 +63,12 @@ class BusquedaActivity : ComponentActivity() {
                     val newSetas = mutableListOf<Seta>()
 
                     for (setaSnapshot in dataSnapshot.children) {
-                        val img_path = setaSnapshot.child("img_path").getValue(String::class.java)
                         val name = setaSnapshot.child("name").getValue(String::class.java)
                         val sci_name = setaSnapshot.child("sci_name").getValue(String::class.java)
                         val warn_level = setaSnapshot.child("warn_level").getValue(Int::class.java)
 
-                        if (img_path != null && name != null && sci_name != null && warn_level != null) {
-                            val seta = Seta(img_path, name, sci_name, warn_level)
+                        if ( name != null && sci_name != null && warn_level != null) {
+                            val seta = Seta( name, sci_name, warn_level, "")
                             newSetas.add(seta)
                         }
                     }
@@ -82,42 +81,46 @@ class BusquedaActivity : ComponentActivity() {
             })
         }
 
+
         Scaffold(
             topBar = {
-                // Define tu TopBar aquí
+                @OptIn(ExperimentalMaterial3Api::class)
                 TopAppBar(
                     modifier = Modifier.background(Color(0xFF6B0C0C)),
-                    title = { }, // No se muestra texto en el título de la TopAppBar
+                    title = { },
                     actions = {
                         Row(
-                            modifier = Modifier.fillMaxWidth().background(Color(0xFF6B0C0C)),
-                            horizontalArrangement = Arrangement.SpaceBetween // Distribuye los elementos de manera uniforme en la fila
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF6B0C0C)),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Mushtool", modifier = Modifier.padding(10.dp).align(Alignment.CenterVertically), color = Color.White) // Texto que se muestra en la esquina izquierda // Texto que se muestra en la esquina izquierda
+                            Text(
+                                "Mushtool",
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .align(Alignment.CenterVertically),
+                                color = Color.White
+                            )
 
                             Button(
                                 onClick = {
                                     val intent = Intent(context, MainActivity::class.java)
-                                    context.startActivity(intent)
-                                },
+                                    context.startActivity(intent) },
                                 modifier = Modifier
-                                    // Tamaño del botón
                                     .align(Alignment.CenterVertically)
                                     .background(Color(0xFF6B0C0C))
                             ) {
                                 Image(
-                                    painter = painterResource(R.drawable.boton_exit), // Cambiar con tu recurso
-                                    contentDescription = "Descripción de la imagen",
-                                    modifier = Modifier
-                                        .size(30.dp, 30.dp) // Tamaño de la imagen
-                                    // Hace que la imagen llene todo el espacio disponible del botón
+                                    painter = painterResource(R.drawable.boton_exit),
+                                    contentDescription = "Exit Button",
+                                    modifier = Modifier.size(30.dp, 30.dp)
                                 )
                             }
                         }
                     }
                 )
             },
-
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -146,7 +149,6 @@ class BusquedaActivity : ComponentActivity() {
                                 }
                                 Button(onClick = {
                                     val intent = Intent(context, EditarSetaActivity::class.java)
-                                    intent.putExtra("img_path", seta.img_path)
                                     intent.putExtra("name", seta.name)
                                     intent.putExtra("sci_name", seta.sci_name)
                                     intent.putExtra("warn_level", seta.warn_level)

@@ -1,31 +1,24 @@
 package com.example.Projecte3MushTool
 
+import androidx.compose.foundation.background
+import androidx.compose.material3.ExperimentalMaterial3Api
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
-import androidx.compose.runtime.remember
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,47 +26,89 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.lemonade.ui.theme.AppTheme
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import java.util.*
+
+
+
 
 class CrearSetaActivity : ComponentActivity() {
     private lateinit var Boletreference: DatabaseReference
+    private lateinit var storageReference: StorageReference
+    private var imageUriPre: Uri? = null
+    private var imageUrl: Uri? = null
+
+    companion object {
+        private const val PICK_IMAGE_REQUEST = 1
+        private const val PERMISSION_REQUEST_CODE = 123
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inicializar Firebase
         Boletreference = FirebaseDatabase.getInstance().getReference("Bolet")
+        storageReference = FirebaseStorage.getInstance().reference
 
         setContent {
-            AppTheme {
-                CrearSetaApp(this)
-            }
+            CrearSetaApp(this)
+        }
+
+        // Solicitar permisos de almacenamiento al iniciar la actividad
+        requestStoragePermission()
+    }
+
+    private fun requestStoragePermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                PERMISSION_REQUEST_CODE)
         }
     }
 
-    // Esta función crea una nueva seta en la base de datos
-    fun crearNuevaSeta(img_path: String, name: String, sci_name: String, warn_level: Int) {
-        val seta = Seta(img_path, name, sci_name, warn_level)
-        Boletreference.child(sci_name).setValue(seta)
-            .addOnSuccessListener {
-            Toast.makeText(this, "Seta añadida correctamente", Toast.LENGTH_SHORT).show()
-        }.addOnFailureListener {
-            Toast.makeText(this, "Error al añadir la seta", Toast.LENGTH_SHORT).show()
+    private fun uploadImageToFirebaseStorage(imageUri: Uri, imageName: String) {
+        val imageRef = storageReference.child("images").child("$imageName.jpg")
+
+        imageRef.putFile(imageUri)
+            .addOnSuccessListener { taskSnapshot ->
+                imageRef.downloadUrl.addOnSuccessListener { uri ->
+                    Toast.makeText(this, "Imagen subida correctamente", Toast.LENGTH_SHORT).show()
+                    // Guardar la URL de la imagen subida
+                    imageUrl = uri
+                }
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(this, "Error al subir la imagen: ${exception.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permiso de almacenamiento concedido", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Permiso de almacenamiento denegado", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CrearSetaApp(context: Context) {
-        val imgPathState =  remember { mutableStateOf("") }
-        val nameState =  remember { mutableStateOf("") }
-        val sciNameState =  remember { mutableStateOf("") }
-        val warnLevelState = remember  { mutableStateOf(0) }
+        var name by remember { mutableStateOf("") }
+        var sciName by remember { mutableStateOf("") }
+        var warnLevel by remember { mutableStateOf("") }
 
         Scaffold(
             topBar = {
+                @OptIn(ExperimentalMaterial3Api::class)
                 TopAppBar(
                     modifier = Modifier.background(Color(0xFF6B0C0C)),
                     title = { },
@@ -104,6 +139,8 @@ class CrearSetaActivity : ComponentActivity() {
                                     painter = painterResource(R.drawable.boton_exit),
                                     contentDescription = "Exit Button",
                                     modifier = Modifier.size(30.dp, 30.dp)
+                                        .align(Alignment.CenterVertically)
+                                        .background(Color(0xFF6B0C0C))
                                 )
                             }
                         }
@@ -112,65 +149,82 @@ class CrearSetaActivity : ComponentActivity() {
             },
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    // Campo de entrada para la imagen de la seta
-                    // Aquí puedes implementar la lógica para seleccionar la imagen
-                    // por medio de un diálogo de selección de imágenes, etc.
-                    // Actualmente es un campo de texto simple.
-                    TextField(
-                        value = imgPathState.value,
-                        onValueChange = { imgPathState.value = it },
-                        label = { Text("Ruta de la imagen") }
-                    )
+                Column(
+                    modifier = Modifier.padding(16.dp)
 
-                    Spacer(modifier = Modifier.height(16.dp))
 
-                    // Campo de entrada para el nombre de la seta
+                ) {
                     TextField(
-                        value = nameState.value,
-                        onValueChange = { nameState.value = it },
+                        value = name,
+                        onValueChange = { name = it },
                         label = { Text("Nombre de la seta") }
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Campo de entrada para el nombre científico de la seta
                     TextField(
-                        value = sciNameState.value,
-                        onValueChange = { sciNameState.value = it },
+                        value = sciName,
+                        onValueChange = { sciName = it },
                         label = { Text("Nombre científico de la seta") }
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Campo de entrada para el nivel de advertencia de la seta
-                    // Aquí puedes usar un control deslizante u otro widget apropiado
-                    // dependiendo de cómo quieras manejar el nivel de advertencia.
-                    // Este ejemplo usa un campo de entrada de texto simple.
                     TextField(
-                        value = warnLevelState.value.toString(),
-                        onValueChange = {
-                            // Manejar la conversión de String a Int de manera segura
-                            warnLevelState.value = it.toIntOrNull() ?: 0
-                        },
+                        value = warnLevel,
+                        onValueChange = { warnLevel = it },
                         label = { Text("Nivel de advertencia (0-3)") }
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Botón para enviar el formulario y crear la nueva seta
                     Button(
+
+
                         onClick = {
-                            // Llamar a la función para crear una nueva seta
-                            crearNuevaSeta(imgPathState.value, nameState.value, sciNameState.value, warnLevelState.value)
+                            // Abrir la galería
+                            val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                            startActivityForResult(intent, PICK_IMAGE_REQUEST)
+
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier = Modifier.padding(16.dp)
                             .background(Color(0xFF6B0C0C))
                     ) {
-                        Text("Crear nueva seta", color = Color.White)
+                        Text("Seleccionar imagen")
+                    }
+                    imageUriPre?.let { uri ->
+                        // Si hay una URI de imagen seleccionada, la cargamos
+                        imageUrl?.let { imageUrl ->
+                            Text("Imagen seleccionada: $imageUrl"
+                            )
+                        } ?: run {
+                            // Si no hay URI de imagen seleccionada, mostramos un mensaje
+                            Text("No se ha seleccionado ninguna imagen")
+                        }
+                    }
+
+                    Button(
+                        onClick = {
+                            // Crear la seta si hay una imagen seleccionada
+                            imageUriPre?.let {
+                                uploadImageToFirebaseStorage(it, UUID.randomUUID().toString())
+                                val intent = Intent(context, BusquedaActivity::class.java)
+                                context.startActivity(intent)
+                            } ?: run {
+                                Toast.makeText(context, "Selecciona una imagen primero", Toast.LENGTH_SHORT).show()
+                            }
+                        },                        modifier = Modifier.padding(16.dp)
+                            .background(Color(0xFF6B0C0C))
+                    ) {
+                        Text("Crear seta")
                     }
                 }
+            }
+        }
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.data != null) {
+            val imageUri = data.data
+            imageUri?.let {
+                // Llama a la función para subir la imagen a Firebase Storage
+                uploadImageToFirebaseStorage(it, UUID.randomUUID().toString())
             }
         }
     }

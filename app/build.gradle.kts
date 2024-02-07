@@ -84,6 +84,7 @@ dependencies {
     implementation("androidx.camera:camera-extensions:1.0.0-alpha31")
     implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-storage-ktx:20.3.0")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("com.google.firebase:firebase-database-ktx")
