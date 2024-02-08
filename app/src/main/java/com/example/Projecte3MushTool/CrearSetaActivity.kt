@@ -43,6 +43,9 @@ class CrearSetaActivity : ComponentActivity() {
     private lateinit var storageReference: StorageReference
     private var imageUriPre: Uri? = null
     private var imageUrl: Uri? = null
+    var name by   mutableStateOf("")
+    var sciName by   mutableStateOf("")
+    var warnLevel by  mutableStateOf("")
 
     companion object {
         private const val PICK_IMAGE_REQUEST = 1
@@ -79,7 +82,6 @@ class CrearSetaActivity : ComponentActivity() {
             .addOnSuccessListener { taskSnapshot ->
                 imageRef.downloadUrl.addOnSuccessListener { uri ->
                     Toast.makeText(this, "Imagen subida correctamente", Toast.LENGTH_SHORT).show()
-                    // Guardar la URL de la imagen subida
                     imageUrl = uri
                 }
             }
@@ -98,6 +100,16 @@ class CrearSetaActivity : ComponentActivity() {
             }
         }
     }
+    fun crearNuevaSeta(img_path: String, name: String, sci_name: String, warn_level: Int) {
+        val seta = Seta(img_path, name, sci_name, warn_level)
+        Boletreference.child(sci_name).setValue(seta)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Seta añadida correctamente", Toast.LENGTH_SHORT).show()
+            }.addOnFailureListener {
+                Toast.makeText(this, "Error al añadir la seta", Toast.LENGTH_SHORT).show()
+            }
+    }
+
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -169,7 +181,7 @@ class CrearSetaActivity : ComponentActivity() {
                     TextField(
                         value = warnLevel,
                         onValueChange = { warnLevel = it },
-                        label = { Text("Nivel de advertencia (0-3)") }
+                        label = { Text("Nivel de advertencia (0-10)") }
                     )
 
                     Button(
@@ -200,13 +212,9 @@ class CrearSetaActivity : ComponentActivity() {
                     Button(
                         onClick = {
                             // Crear la seta si hay una imagen seleccionada
-                            imageUriPre?.let {
-                                uploadImageToFirebaseStorage(it, UUID.randomUUID().toString())
+                                crearNuevaSeta(imageUrl.toString(), name, sciName, warnLevel.toInt())
                                 val intent = Intent(context, BusquedaActivity::class.java)
                                 context.startActivity(intent)
-                            } ?: run {
-                                Toast.makeText(context, "Selecciona una imagen primero", Toast.LENGTH_SHORT).show()
-                            }
                         },                        modifier = Modifier.padding(16.dp)
                             .background(Color(0xFF6B0C0C))
                     ) {

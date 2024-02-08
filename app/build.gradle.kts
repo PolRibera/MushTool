@@ -88,4 +88,5 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("com.google.firebase:firebase-database-ktx")
+    implementation("io.coil-kt:coil-compose:1.4.0")
 }

@@ -25,20 +25,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.Projecte3MushTool.CrearSetaActivity
-import com.example.Projecte3MushTool.EditarSetaActivity
-import com.example.Projecte3MushTool.MainActivity
-import com.example.Projecte3MushTool.Seta
 import com.example.lemonade.ui.theme.AppTheme
 import com.google.firebase.database.*
+import coil.compose.rememberImagePainter
+import com.google.firebase.storage.FirebaseStorage
 
 class BusquedaActivity : ComponentActivity() {
     private lateinit var Boletreference: DatabaseReference
-
+    private lateinit var storageReference: FirebaseStorage
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Inicializar Firebase
+        storageReference = FirebaseStorage.getInstance()
         Boletreference = FirebaseDatabase.getInstance().getReference("Bolet")
 
         setContent {
@@ -63,12 +62,14 @@ class BusquedaActivity : ComponentActivity() {
                     val newSetas = mutableListOf<Seta>()
 
                     for (setaSnapshot in dataSnapshot.children) {
+                        val imageUrl = setaSnapshot.child("imageUrl").getValue(String::class.java)
                         val name = setaSnapshot.child("name").getValue(String::class.java)
                         val sci_name = setaSnapshot.child("sci_name").getValue(String::class.java)
                         val warn_level = setaSnapshot.child("warn_level").getValue(Int::class.java)
 
-                        if ( name != null && sci_name != null && warn_level != null) {
-                            val seta = Seta( name, sci_name, warn_level, "")
+
+                        if (name != null && sci_name != null && warn_level != null && imageUrl != null) {
+                            val seta = Seta(imageUrl,name, sci_name, warn_level)
                             newSetas.add(seta)
                         }
                     }
@@ -135,80 +136,100 @@ class BusquedaActivity : ComponentActivity() {
                         Text("Añadir seta")
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    LazyColumn {
-                        items(setasState) { seta ->
-                            Text(text = "Nombre cientifico: " + seta.sci_name)
-                            Text(text = "Nombre comun: " + seta.name)
-                            Text(text = "Nivel de peligrosidad (0-10): " + seta.warn_level + "")
-                            Row {
-                                Button(onClick = {
-                                    selectedSeta = seta
-                                    showDialog = true
-                                }) {
-                                    Text("Delete")
-                                }
-                                Button(onClick = {
-                                    val intent = Intent(context, EditarSetaActivity::class.java)
-                                    intent.putExtra("name", seta.name)
-                                    intent.putExtra("sci_name", seta.sci_name)
-                                    intent.putExtra("warn_level", seta.warn_level)
-                                    context.startActivity(intent)
-                                }) {
-                                    Text("Edit")
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
 
-                            if (showDialog) {
-                                AlertDialog(
-                                    onDismissRequest = {
-                                        showDialog = false
-                                        selectedSeta = null
-                                    },
-                                    title = {
-                                        Text("Confirmación")
-                                    },
-                                    text = {
-                                        Text("¿Seguro que quieres borrar esta seta?")
-                                    },
-                                    confirmButton = {
-                                        Button(
-                                            onClick = {
-                                                showDialog = false
-                                                selectedSeta?.let { seta ->
-                                                    // Remove seta from database
-                                                    Boletreference.child(seta.sci_name)
-                                                        .removeValue()
-                                                    Toast.makeText(
-                                                        context,
-                                                        "Seta eliminada correctamente",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                    selectedSeta = null
-                                                }
+                        LazyColumn {
+                            items(setasState) { seta ->
+                                Row() {
+                                        Image(
+                                            painter = rememberImagePainter(seta.imageUrl),
+                                            contentDescription = "Imagen de ${seta.name}",
+                                            modifier = Modifier.size(100.dp)
+                                        )
+                                    Column() {
+                                        Text(text = "Nombre cientifico: " + seta.sci_name)
+                                        Text(text = "Nombre comun: " + seta.name)
+                                        Text(text = "Nivel de peligrosidad (0-10): " + seta.warn_level + "")
+                                        Row {
+                                            Button(onClick = {
+                                                selectedSeta = seta
+                                                showDialog = true
+                                            }) {
+                                                Text("Delete")
                                             }
-                                        ) {
-                                            Text("Confirmar")
+                                            Button(onClick = {
+                                                val intent =
+                                                    Intent(context, EditarSetaActivity::class.java)
+                                                intent.putExtra("img_path", seta.imageUrl)
+                                                intent.putExtra("name", seta.name)
+                                                intent.putExtra("sci_name", seta.sci_name)
+                                                intent.putExtra("warn_level", seta.warn_level)
+                                                context.startActivity(intent)
+                                            }) {
+                                                Text("Edit")
+                                            }
                                         }
-                                    },
-                                    dismissButton = {
-                                        Button(
-                                            onClick = {
-                                                showDialog = false
-                                                selectedSeta = null
-                                            }
-                                        ) {
-                                            Text("Cancelar")
+                                        Spacer(modifier = Modifier.height(16.dp))
+
+                                        if (showDialog) {
+                                            AlertDialog(
+                                                onDismissRequest = {
+                                                    showDialog = false
+                                                    selectedSeta = null
+                                                },
+                                                title = {
+                                                    Text("Confirmación")
+                                                },
+                                                text = {
+                                                    Text("¿Seguro que quieres borrar esta seta?")
+                                                },
+                                                confirmButton = {
+                                                    Button(
+                                                        onClick = {
+                                                            showDialog = false
+                                                            selectedSeta?.let { seta ->
+                                                                // Remove seta from database
+                                                                Boletreference.child(seta.sci_name)
+                                                                    .removeValue()
+                                                                Toast.makeText(
+                                                                    context,
+                                                                    "Seta eliminada correctamente",
+                                                                    Toast.LENGTH_SHORT
+                                                                ).show()
+                                                                selectedSeta = null
+                                                            }
+                                                        }
+                                                    ) {
+                                                        Text("Confirmar")
+                                                    }
+                                                },
+                                                dismissButton = {
+                                                    Button(
+                                                        onClick = {
+                                                            showDialog = false
+                                                            selectedSeta = null
+                                                        }
+                                                    ) {
+                                                        Text("Cancelar")
+                                                    }
+                                                }
+                                            )
                                         }
                                     }
-                                )
+                                }
+
                             }
+
                         }
+
                     }
+
                 }
             }
         }
-    }
+
+
+
+
 
     @Preview(showBackground = true)
     @Composable
