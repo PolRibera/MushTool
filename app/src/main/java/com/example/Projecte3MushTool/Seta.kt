@@ -1,8 +1,8 @@
 package com.example.Projecte3MushTool
 
-data class Seta(
-    var img_path: String,
-    var name: String,
-    var sci_name: String,
-    var warn_level: Int
-)
+class Seta(imageUrl: String, name: String, sci_name: String, warn_level: Int ) {
+    var imageUrl: String = imageUrl
+    var name: String = name
+    var sci_name: String = sci_name
+    var warn_level: Int = warn_level
+}
