@@ -3,17 +3,14 @@ package com.example.Projecte3MushTool
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.preference.PreferenceManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,67 +27,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.app.ActivityCompat
 import com.example.lemonade.ui.theme.AppTheme
-import org.osmdroid.config.Configuration
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.views.MapView
-
 
 class MapaActivity : ComponentActivity() {
-
-
-    private val REQUEST_PERMISSIONS_REQUEST_CODE = 1
-    private lateinit var map : MapView
-
-    // Crear el contrato para solicitar permisos
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (!isGranted) {
-            // Permiso denegado, puedes manejarlo aquí
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
-
         setContent {
             AppTheme {
                 MapaApp(this)
             }
         }
-
-        map.setTileSource(TileSourceFactory.MAPNIK)
     }
-
-    override fun onPause() {
-        super.onPause()
-        map.onPause()
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        val permissionsToRequest = ArrayList<String>()
-        var i = 0
-        while (i < grantResults.size) {
-            permissionsToRequest.add(permissions[i])
-            i++
-        }
-        if (permissionsToRequest.size > 0) {
-            ActivityCompat.requestPermissions(
-                this,
-                permissionsToRequest.toTypedArray(),
-                REQUEST_PERMISSIONS_REQUEST_CODE)
-        }
-    }
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun MapaApp(context: Context) { // Define el color de los botones aquí
+
         Scaffold(
             topBar = {
                 // Define tu TopBar aquí
@@ -126,27 +77,25 @@ class MapaActivity : ComponentActivity() {
                     }
                 )
             },
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-            ) {
-                AndroidView(
-                    factory = { ctx ->
-                        MapView(ctx).apply {
-                            id = R.id.map
-                            setTileSource(TileSourceFactory.MAPNIK)
-                        }
-                    },
-                    modifier = Modifier.weight(1f)
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly // Distribuye los elementos de manera uniforme en la fila
+
+            ) { innerPadding ->
+            Box(modifier = Modifier.padding(innerPadding)) {
+                // Aquí puedes colocar el contenido principal de tu aplicación
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Mapa") // Texto del botón
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly // Distribuye los elementos de manera uniforme en la fila
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+                            Text("Mapa") // Texto del botón
+                        }
                     }
                 }
             }
@@ -160,5 +109,5 @@ class MapaActivity : ComponentActivity() {
             MapaApp(LocalContext.current)
         }
     }
-
 }
+
