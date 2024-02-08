@@ -1,8 +1,16 @@
 package com.example.Projecte3MushTool
+
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.graphics.Bitmap
+import android.provider.MediaStore
+import android.widget.Button
+import android.widget.ImageView
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,87 +40,34 @@ import com.example.lemonade.ui.theme.AppTheme
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+
 class FotosActivity : ComponentActivity() {
 
-    private lateinit var cameraExecutor: ExecutorService
+    lateinit var imagen: ImageView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            AppTheme {
-                FotosApp(this)
-            }
+        setContentView(R.layout.fotos_activity)
+        val captura: Button = findViewById(R.id.btnFoto)
+        imagen = findViewById(R.id.imagenPhoto)
+        captura.setOnClickListener {
+            takePhoto()
+        }
+        val volver: Button = findViewById(R.id.btnVolver)
+        volver.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun FotosApp(context: Context) { // Define el color de los botones aquí
-
-        Scaffold(
-            topBar = {
-                // Define tu TopBar aquí
-                TopAppBar(
-                    modifier = Modifier.background(Color(0xFF6B0C0C)),
-                    title = { }, // No se muestra texto en el título de la TopAppBar
-                    actions = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().background(Color(0xFF6B0C0C)),
-                            horizontalArrangement = Arrangement.SpaceBetween // Distribuye los elementos de manera uniforme en la fila
-                        ) {
-                            Text("Mushtool", modifier = Modifier.padding(10.dp).align(Alignment.CenterVertically), color = Color.White) // Texto que se muestra en la esquina izquierda // Texto que se muestra en la esquina izquierda
-
-                            Button(
-                                onClick = {
-                                    val intent = Intent(context, MainActivity::class.java)
-                                    context.startActivity(intent)
-                                },
-                                modifier = Modifier
-                                    // Tamaño del botón
-                                    .align(Alignment.CenterVertically)
-                                    .background(Color(0xFF6B0C0C))
-                            ) {
-                                Image(
-                                    painter = painterResource(R.drawable.boton_exit), // Cambiar con tu recurso
-                                    contentDescription = "Descripción de la imagen",
-                                    modifier = Modifier
-                                        .size(30.dp, 30.dp) // Tamaño de la imagen
-                                    // Hace que la imagen llene todo el espacio disponible del botón
-                                )
-                            }
-                        }
-                    }
-                )
-            },
-
-            ) { innerPadding ->
-            Box(modifier = Modifier.padding(innerPadding)) {
-                // Aquí puedes colocar el contenido principal de tu aplicación
-
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly // Distribuye los elementos de manera uniforme en la fila
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-                            Text("Fotos") // Texto del botón
-                        }
-                    }
-                }
-            }
-        }
+    val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        val bitmap = it.data?.extras?.get("data") as Bitmap
+        imagen.setImageBitmap(bitmap)
     }
 
-    @Preview(showBackground = true)
-    @Composable
-    fun DefaultPreview() {
-        AppTheme {
-            FotosApp(LocalContext.current)
+    fun takePhoto() {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (intent.resolveActivity(packageManager) != null) {
+            getAction.launch(intent)
         }
     }
 }
