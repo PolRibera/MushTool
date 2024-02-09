@@ -1,11 +1,13 @@
 package com.example.Projecte3MushTool
 
 import android.app.ProgressDialog
+import android.content.Intent
 import android.graphics.Rect
 import android.location.GpsStatus
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.Projecte3MushTool.R
 import org.osmdroid.api.IMapController
@@ -53,14 +55,13 @@ class MapaActivity : AppCompatActivity(), MapListener, GpsStatus.Listener {
                 controller.animateTo(mMyLocationOverlay.myLocation)
             }
         }
-        // val mapPoint = GeoPoint(latitude, longitude)
 
         controller.setZoom(6.0)
 
         Log.e("TAG", "onCreate:in ${controller.zoomIn()}")
         Log.e("TAG", "onCreate: out  ${controller.zoomOut()}")
 
-        // controller.animateTo(mapPoint)
+
         mMap.overlays.add(mMyLocationOverlay)
 
         mMap.addMapListener(this)
@@ -69,25 +70,18 @@ class MapaActivity : AppCompatActivity(), MapListener, GpsStatus.Listener {
     }
 
     override fun onScroll(event: ScrollEvent?): Boolean {
-        // event?.source?.getMapCenter()
         Log.e("TAG", "onCreate:la ${event?.source?.getMapCenter()?.latitude}")
         Log.e("TAG", "onCreate:lo ${event?.source?.getMapCenter()?.longitude}")
-        //  Log.e("TAG", "onScroll   x: ${event?.x}  y: ${event?.y}", )
         return true
     }
 
     override fun onZoom(event: ZoomEvent?): Boolean {
-        //  event?.zoomLevel?.let { controller.setZoom(it) }
-
-
         Log.e("TAG", "onZoom zoom level: ${event?.zoomLevel}   source:  ${event?.source}")
         return false;
     }
 
-    override fun onGpsStatusChanged(event: Int) {
-
-
-        TODO("Not yet implemented")
+    override fun onGpsStatusChanged(p0: Int) {
+        TODO("No esta implementado")
     }
 
 
