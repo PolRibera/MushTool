@@ -1,5 +1,6 @@
 package com.example.Projecte3MushTool
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -35,10 +36,12 @@ class FotosActivity : ComponentActivity() {
             FotosApp(context)
         }
     }
-
-    private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        val bitmap = it.data?.extras?.get("data") as Bitmap
-        capturedBitmap = bitmap
+    private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            val imageBitmap = data?.extras?.get("data") as Bitmap
+            capturedBitmap = imageBitmap
+        }
     }
 
     var capturedBitmap by mutableStateOf<Bitmap?>(null)
