@@ -53,9 +53,7 @@ class EditarSetaActivity : ComponentActivity() {
         val warnLevel = intent.getIntExtra("warn_level", 0)
 
         setContent {
-            AppTheme {
                 EditarSetaApp(this, imgPath, name, sciName, warnLevel)
-            }
         }
     }
 

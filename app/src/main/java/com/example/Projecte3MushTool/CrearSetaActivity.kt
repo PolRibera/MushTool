@@ -212,9 +212,9 @@ class CrearSetaActivity : ComponentActivity() {
                     Button(
                         onClick = {
                             // Crear la seta si hay una imagen seleccionada
-                                crearNuevaSeta(imageUrl.toString(), name, sciName, warnLevel.toInt())
-                                val intent = Intent(context, BusquedaActivity::class.java)
-                                context.startActivity(intent)
+                            crearNuevaSeta(imageUrl.toString(), name, sciName, warnLevel.toInt())
+                            val intent = Intent(context, BusquedaActivity::class.java)
+                            context.startActivity(intent)
                         },                        modifier = Modifier.padding(16.dp)
                             .background(Color(0xFF6B0C0C))
                     ) {

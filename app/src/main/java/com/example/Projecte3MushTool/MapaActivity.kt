@@ -1,113 +1,88 @@
 package com.example.Projecte3MushTool
 
-import android.content.Context
+import android.app.ProgressDialog
 import android.content.Intent
+import android.graphics.Rect
+import android.location.GpsStatus
+import android.location.Location
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.example.lemonade.ui.theme.AppTheme
+import android.util.Log
+import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+import com.example.Projecte3MushTool.R
+import org.osmdroid.api.IMapController
+import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import com.example.Projecte3MushTool.databinding.MapaActivityBinding
 
-class MapaActivity : ComponentActivity() {
+
+class MapaActivity : AppCompatActivity(), MapListener, GpsStatus.Listener {
+
+
+    lateinit var mMap: MapView
+    lateinit var controller: IMapController;
+    lateinit var mMyLocationOverlay: MyLocationNewOverlay;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            AppTheme {
-                MapaApp(this)
+        val binding = MapaActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        Configuration.getInstance().load(
+            applicationContext,
+            getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE)
+        )
+        mMap = binding.osmmap
+        mMap.setTileSource(TileSourceFactory.MAPNIK)
+        mMap.mapCenter
+        mMap.setMultiTouchControls(true)
+        mMap.getLocalVisibleRect(Rect())
+
+
+        mMyLocationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), mMap)
+        controller = mMap.controller
+
+        mMyLocationOverlay.enableMyLocation()
+        mMyLocationOverlay.enableFollowLocation()
+        mMyLocationOverlay.isDrawAccuracyEnabled = true
+        mMyLocationOverlay.runOnFirstFix {
+            runOnUiThread {
+                controller.setCenter(mMyLocationOverlay.myLocation);
+                controller.animateTo(mMyLocationOverlay.myLocation)
             }
         }
-    }
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun MapaApp(context: Context) { // Define el color de los botones aquí
 
-        Scaffold(
-            topBar = {
-                // Define tu TopBar aquí
-                TopAppBar(
-                    modifier = Modifier.background(Color(0xFF6B0C0C)),
-                    title = { }, // No se muestra texto en el título de la TopAppBar
-                    actions = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().background(Color(0xFF6B0C0C)),
-                            horizontalArrangement = Arrangement.SpaceBetween // Distribuye los elementos de manera uniforme en la fila
-                        ) {
-                            Text("Mushtool", modifier = Modifier.padding(10.dp).align(Alignment.CenterVertically), color = Color.White) // Texto que se muestra en la esquina izquierda // Texto que se muestra en la esquina izquierda
+        controller.setZoom(6.0)
 
-                            Button(
-                                onClick = {
-                                    val intent = Intent(context, MainActivity::class.java)
-                                    context.startActivity(intent)
-                                },
-                                modifier = Modifier
-                                    // Tamaño del botón
-                                    .align(Alignment.CenterVertically)
-                                    .background(Color(0xFF6B0C0C))
-                            ) {
-                                Image(
-                                    painter = painterResource(R.drawable.boton_exit), // Cambiar con tu recurso
-                                    contentDescription = "Descripción de la imagen",
-                                    modifier = Modifier
-                                        .size(30.dp, 30.dp) // Tamaño de la imagen
-                                    // Hace que la imagen llene todo el espacio disponible del botón
-                                )
-                            }
-                        }
-                    }
-                )
-            },
+        Log.e("TAG", "onCreate:in ${controller.zoomIn()}")
+        Log.e("TAG", "onCreate: out  ${controller.zoomOut()}")
 
-            ) { innerPadding ->
-            Box(modifier = Modifier.padding(innerPadding)) {
-                // Aquí puedes colocar el contenido principal de tu aplicación
 
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly // Distribuye los elementos de manera uniforme en la fila
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        mMap.overlays.add(mMyLocationOverlay)
 
-                            Text("Mapa") // Texto del botón
-                        }
-                    }
-                }
-            }
-        }
+        mMap.addMapListener(this)
+
+
     }
 
-    @Preview(showBackground = true)
-    @Composable
-    fun DefaultPreview() {
-        AppTheme {
-            MapaApp(LocalContext.current)
-        }
+    override fun onScroll(event: ScrollEvent?): Boolean {
+        Log.e("TAG", "onCreate:la ${event?.source?.getMapCenter()?.latitude}")
+        Log.e("TAG", "onCreate:lo ${event?.source?.getMapCenter()?.longitude}")
+        return true
     }
+
+    override fun onZoom(event: ZoomEvent?): Boolean {
+        Log.e("TAG", "onZoom zoom level: ${event?.zoomLevel}   source:  ${event?.source}")
+        return false;
+    }
+
+    override fun onGpsStatusChanged(p0: Int) {
+        TODO("No esta implementado")
+    }
+
+
 }
-
