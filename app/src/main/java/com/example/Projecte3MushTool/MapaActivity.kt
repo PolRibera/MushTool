@@ -20,6 +20,8 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import com.example.Projecte3MushTool.databinding.MapaActivityBinding
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.Marker
 
 
 class MapaActivity : AppCompatActivity(), MapListener, GpsStatus.Listener {
@@ -28,6 +30,7 @@ class MapaActivity : AppCompatActivity(), MapListener, GpsStatus.Listener {
     lateinit var mMap: MapView
     lateinit var controller: IMapController;
     lateinit var mMyLocationOverlay: MyLocationNewOverlay;
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = MapaActivityBinding.inflate(layoutInflater)
@@ -42,36 +45,43 @@ class MapaActivity : AppCompatActivity(), MapListener, GpsStatus.Listener {
         mMap.setMultiTouchControls(true)
         mMap.getLocalVisibleRect(Rect())
 
-
         mMyLocationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), mMap)
         controller = mMap.controller
+
 
         mMyLocationOverlay.enableMyLocation()
         mMyLocationOverlay.enableFollowLocation()
         mMyLocationOverlay.isDrawAccuracyEnabled = true
+
         mMyLocationOverlay.runOnFirstFix {
             runOnUiThread {
-                controller.setCenter(mMyLocationOverlay.myLocation);
+                controller.setCenter(mMyLocationOverlay.myLocation)
                 controller.animateTo(mMyLocationOverlay.myLocation)
             }
         }
 
+        //marcador
         controller.setZoom(6.0)
+        val markerLocation = GeoPoint(41.3851, 2.1734)
+        val marker = Marker(mMap)
+        marker.position = markerLocation
+        marker.title = "Barcelona"
+        mMap.overlays.add(marker)
+        mMap.overlays.add(mMyLocationOverlay)
 
         Log.e("TAG", "onCreate:in ${controller.zoomIn()}")
         Log.e("TAG", "onCreate: out  ${controller.zoomOut()}")
 
-
-        mMap.overlays.add(mMyLocationOverlay)
+        controller.setZoom(6.0)
 
         mMap.addMapListener(this)
-
-
     }
 
+
+
     override fun onScroll(event: ScrollEvent?): Boolean {
-        Log.e("TAG", "onCreate:la ${event?.source?.getMapCenter()?.latitude}")
-        Log.e("TAG", "onCreate:lo ${event?.source?.getMapCenter()?.longitude}")
+        Log.e("TAG", "onCreate:la ${event?.source?.mapCenter?.latitude}")
+        Log.e("TAG", "onCreate:lo ${event?.source?.mapCenter?.longitude}")
         return true
     }
 

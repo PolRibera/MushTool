@@ -46,6 +46,16 @@ class MainActivity : ComponentActivity() {
 }
 
 
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    AppTheme {
+        LemonadeApp(LocalContext.current)
+    }
+}
+
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LemonadeApp(context: Context) { // Define el color de los botones aquí
@@ -69,7 +79,7 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                                 context.startActivity(intentConfig)
                             },
                             modifier = Modifier
-                                 // Tamaño del botón
+                                // Tamaño del botón
                                 .align(Alignment.CenterVertically)
                                 .background(Color(0xFF6B0C0C))
                         ) {
@@ -224,21 +234,11 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                             ,// Tamaño cuadrado del botón
                             // Agrega espacio alrededor del botón
                         ) {
-                            Text("Fotos Comunitat") // Texto del botón
+                            Text("Posts") // Texto del botón
                         }
                     }
                 }
             }
         }
-    }
-}
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    AppTheme {
-        LemonadeApp(LocalContext.current)
     }
 }
