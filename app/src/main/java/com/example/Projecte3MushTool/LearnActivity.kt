@@ -47,6 +47,7 @@ class LearnActivity : ComponentActivity() {
     fun TestGameApp(context: Context) {
         var setas by remember { mutableStateOf<List<Seta>>(emptyList()) }
         var correctSetaIndex by remember { mutableStateOf(0) }
+        var currentQuestionIndex by remember { mutableStateOf(0) }
 
         LaunchedEffect(true) {
             Boletreference.addValueEventListener(object : ValueEventListener {
@@ -58,9 +59,10 @@ class LearnActivity : ComponentActivity() {
                         val name = setaSnapshot.child("name").getValue(String::class.java)
                         val sci_name = setaSnapshot.child("sci_name").getValue(String::class.java)
                         val warn_level = setaSnapshot.child("warn_level").getValue(Int::class.java)
+                        val difficulty = setaSnapshot.child("difficulty").getValue(Int::class.java)
 
-                        if (imageUrl != null && name != null && sci_name != null && warn_level != null) {
-                            newSetas.add(Seta(imageUrl, name, sci_name, warn_level))
+                        if (imageUrl != null && name != null && sci_name != null && warn_level != null && difficulty != null) {
+                            newSetas.add(Seta(imageUrl, name, sci_name, warn_level, difficulty))
                         }
                     }
 
@@ -75,7 +77,6 @@ class LearnActivity : ComponentActivity() {
 
         Scaffold(
             topBar = {
-                @OptIn(ExperimentalMaterial3Api::class)
                 TopAppBar(
                     modifier = Modifier.background(Color(0xFF6B0C0C)),
                     title = { },
@@ -97,7 +98,8 @@ class LearnActivity : ComponentActivity() {
                             Button(
                                 onClick = {
                                     val intent = Intent(context, MainActivity::class.java)
-                                    context.startActivity(intent) },
+                                    context.startActivity(intent)
+                                },
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically)
                                     .background(Color(0xFF6B0C0C))
@@ -115,33 +117,36 @@ class LearnActivity : ComponentActivity() {
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    LazyColumn {
-                        items(setas) { seta ->
-                            val options = setas.map { it.name }.shuffled()
-                            val correctOption = seta.name
+                    if (currentQuestionIndex < setas.size) {
+                        val seta = setas[currentQuestionIndex]
+                        val options = setas.map { it.name }.shuffled()
+                        val correctOption = seta.name
 
-                            Question(
-                                seta = seta,
-                                options = options,
-                                correctOption = correctOption,
-                                onOptionSelected = { selectedOption ->
-                                    if (selectedOption == correctOption) {
-                                        Toast.makeText(
-                                            context,
-                                            "¡Correcto!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        correctSetaIndex = (0 until setas.size).random()
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Incorrecto, inténtalo de nuevo",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                        Question(
+                            seta = seta,
+                            options = options,
+                            correctOption = correctOption,
+                            onOptionSelected = { selectedOption ->
+                                if (selectedOption == correctOption) {
+                                    Toast.makeText(
+                                        context,
+                                        "¡Correcto!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    currentQuestionIndex++
+                                    correctSetaIndex = (0 until setas.size).random()
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Incorrecto, inténtalo de nuevo",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
-                            )
-                        }
+                            }
+                        )
+                    } else {
+                        // Todas las preguntas han sido respondidas
+                        Text("¡Felicidades, has respondido todas las preguntas!")
                     }
                 }
             }
@@ -178,9 +183,6 @@ class LearnActivity : ComponentActivity() {
             }
         }
     }
-
-
-
 
     @Preview(showBackground = true)
     @Composable
