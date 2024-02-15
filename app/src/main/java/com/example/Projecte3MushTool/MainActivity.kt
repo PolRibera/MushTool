@@ -225,7 +225,7 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Button(
-                            onClick = {  val intentPLats = Intent(context, FotosActivity::class.java)
+                            onClick = {  val intentPLats = Intent(context, PostActivity::class.java)
                                 context.startActivity(intentPLats) },
                             modifier = Modifier
                                 .padding(10.dp)

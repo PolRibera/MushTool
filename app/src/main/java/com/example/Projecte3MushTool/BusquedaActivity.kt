@@ -66,10 +66,10 @@ class BusquedaActivity : ComponentActivity() {
                         val name = setaSnapshot.child("name").getValue(String::class.java)
                         val sci_name = setaSnapshot.child("sci_name").getValue(String::class.java)
                         val warn_level = setaSnapshot.child("warn_level").getValue(Int::class.java)
+                        val difficulty = setaSnapshot.child("difficulty").getValue(Int::class.java)
 
-
-                        if (name != null && sci_name != null && warn_level != null && imageUrl != null) {
-                            val seta = Seta(imageUrl,name, sci_name, warn_level)
+                        if (name != null && sci_name != null && warn_level != null && difficulty != null && imageUrl != null) {
+                            val seta = Seta(imageUrl,name, sci_name, warn_level, difficulty)
                             newSetas.add(seta)
                         }
                     }

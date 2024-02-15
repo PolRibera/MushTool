@@ -4,5 +4,6 @@ data class Seta(
     var imageUrl: String,
     var name: String,
     var sci_name: String,
-    var warn_level: Int
+    var warn_level: Int,
+    var difficulty: Int
 )

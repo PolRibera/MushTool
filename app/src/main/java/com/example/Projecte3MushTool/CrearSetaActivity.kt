@@ -36,16 +36,15 @@ import com.google.firebase.storage.StorageReference
 import java.util.*
 
 
-
-
 class CrearSetaActivity : ComponentActivity() {
     private lateinit var Boletreference: DatabaseReference
     private lateinit var storageReference: StorageReference
     private var imageUriPre: Uri? = null
     private var imageUrl: Uri? = null
-    var name by   mutableStateOf("")
-    var sciName by   mutableStateOf("")
-    var warnLevel by  mutableStateOf("")
+    var name by mutableStateOf("")
+    var sciName by mutableStateOf("")
+    var warnLevel by mutableStateOf("")
+    var dificulty by mutableStateOf("")
 
     companion object {
         private const val PICK_IMAGE_REQUEST = 1
@@ -68,10 +67,13 @@ class CrearSetaActivity : ComponentActivity() {
 
     private fun requestStoragePermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                PERMISSION_REQUEST_CODE)
+                PERMISSION_REQUEST_CODE
+            )
         }
     }
 
@@ -86,22 +88,39 @@ class CrearSetaActivity : ComponentActivity() {
                 }
             }
             .addOnFailureListener { exception ->
-                Toast.makeText(this, "Error al subir la imagen: ${exception.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "Error al subir la imagen: ${exception.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Permiso de almacenamiento concedido", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Permiso de almacenamiento concedido", Toast.LENGTH_SHORT)
+                    .show()
             } else {
-                Toast.makeText(this, "Permiso de almacenamiento denegado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Permiso de almacenamiento denegado", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
-    fun crearNuevaSeta(img_path: String, name: String, sci_name: String, warn_level: Int) {
-        val seta = Seta(img_path, name, sci_name, warn_level)
+
+    fun crearNuevaSeta(
+        img_path: String,
+        name: String,
+        sci_name: String,
+        warn_level: Int,
+        dificulty: Int
+    ) {
+        val seta = Seta(img_path, name, sci_name, warn_level, dificulty)
         Boletreference.child(sci_name).setValue(seta)
             .addOnSuccessListener {
                 Toast.makeText(this, "Seta añadida correctamente", Toast.LENGTH_SHORT).show()
@@ -117,6 +136,7 @@ class CrearSetaActivity : ComponentActivity() {
         var name by remember { mutableStateOf("") }
         var sciName by remember { mutableStateOf("") }
         var warnLevel by remember { mutableStateOf("") }
+        var difficulty by remember { mutableStateOf("") }
 
         Scaffold(
             topBar = {
@@ -142,7 +162,8 @@ class CrearSetaActivity : ComponentActivity() {
                             Button(
                                 onClick = {
                                     val intent = Intent(context, MainActivity::class.java)
-                                    context.startActivity(intent) },
+                                    context.startActivity(intent)
+                                },
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically)
                                     .background(Color(0xFF6B0C0C))
@@ -150,7 +171,8 @@ class CrearSetaActivity : ComponentActivity() {
                                 Image(
                                     painter = painterResource(R.drawable.boton_exit),
                                     contentDescription = "Exit Button",
-                                    modifier = Modifier.size(30.dp, 30.dp)
+                                    modifier = Modifier
+                                        .size(30.dp, 30.dp)
                                         .align(Alignment.CenterVertically)
                                         .background(Color(0xFF6B0C0C))
                                 )
@@ -184,16 +206,27 @@ class CrearSetaActivity : ComponentActivity() {
                         label = { Text("Nivel de advertencia (0-10)") }
                     )
 
+                    TextField(
+                        value = difficulty,
+                        onValueChange = { difficulty = it },
+                        label = {
+                            Text("Dificultad (0-10)")
+                        }
+                    )
                     Button(
 
 
                         onClick = {
                             // Abrir la galería
-                            val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                            val intent = Intent(
+                                Intent.ACTION_PICK,
+                                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                            )
                             startActivityForResult(intent, PICK_IMAGE_REQUEST)
 
                         },
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier
+                            .padding(16.dp)
                             .background(Color(0xFF6B0C0C))
                     ) {
                         Text("Seleccionar imagen")
@@ -201,7 +234,8 @@ class CrearSetaActivity : ComponentActivity() {
                     imageUriPre?.let { uri ->
                         // Si hay una URI de imagen seleccionada, la cargamos
                         imageUrl?.let { imageUrl ->
-                            Text("Imagen seleccionada: $imageUrl"
+                            Text(
+                                "Imagen seleccionada: $imageUrl"
                             )
                         } ?: run {
                             // Si no hay URI de imagen seleccionada, mostramos un mensaje
@@ -212,10 +246,17 @@ class CrearSetaActivity : ComponentActivity() {
                     Button(
                         onClick = {
                             // Crear la seta si hay una imagen seleccionada
-                            crearNuevaSeta(imageUrl.toString(), name, sciName, warnLevel.toInt())
+                            crearNuevaSeta(
+                                imageUrl.toString(),
+                                name,
+                                sciName,
+                                warnLevel.toInt(),
+                                difficulty.toInt()
+                            )
                             val intent = Intent(context, BusquedaActivity::class.java)
                             context.startActivity(intent)
-                        },                        modifier = Modifier.padding(16.dp)
+                        }, modifier = Modifier
+                            .padding(16.dp)
                             .background(Color(0xFF6B0C0C))
                     ) {
                         Text("Crear seta")

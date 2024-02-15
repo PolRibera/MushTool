@@ -51,20 +51,19 @@ class EditarSetaActivity : ComponentActivity() {
         val name = intent.getStringExtra("name")
         val sciName = intent.getStringExtra("sci_name")
         val warnLevel = intent.getIntExtra("warn_level", 0)
-
+        val difficulty = intent.getIntExtra("difficulty", 0)
         setContent {
-            AppTheme {
-                EditarSetaApp(this, imgPath, name, sciName, warnLevel)
-            }
+                EditarSetaApp(this, imgPath, name, sciName, warnLevel, difficulty)
         }
     }
 
     @Composable
-    fun EditarSetaApp(context: Context, imgPath: String?, name: String?, sciName: String?, warnLevel: Int?) {
+    fun EditarSetaApp(context: Context, imgPath: String?, name: String?, sciName: String?, warnLevel: Int?, difficulty: Int?) {
         val imgPathState = remember { mutableStateOf(imgPath ?: "") }
         val nameState = remember { mutableStateOf(name ?: "") }
         val sciNameState = remember { mutableStateOf(sciName ?: "") }
         val warnLevelState = remember { mutableStateOf(warnLevel?.toString() ?: "") }
+        val difficultyState = remember { mutableStateOf(difficulty.toString() ?: "") }
 
 
         Scaffold(
@@ -135,7 +134,7 @@ class EditarSetaActivity : ComponentActivity() {
                             val name = nameState.value
                             val sciName = sciNameState.value
                             val warnLevel = warnLevelState.value.toIntOrNull() ?: 0
-
+                            val difficulty = difficultyState.value.toIntOrNull() ?: 0
                             // Obtener el ID de la seta
 
                             // Verificar que todos los campos requeridos estén llenos
@@ -147,7 +146,7 @@ class EditarSetaActivity : ComponentActivity() {
                                 setaReference.child("name").setValue(name)
                                 setaReference.child("sci_name").setValue(sciName)
                                 setaReference.child("warn_level").setValue(warnLevel)
-
+                                setaReference.child("difficulty").setValue(difficulty)
                                 // Mensaje de éxito
                                 Toast.makeText(
                                     context,
