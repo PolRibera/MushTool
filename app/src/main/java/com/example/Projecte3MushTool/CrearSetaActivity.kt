@@ -44,7 +44,7 @@ class CrearSetaActivity : ComponentActivity() {
     var name by mutableStateOf("")
     var sciName by mutableStateOf("")
     var warnLevel by mutableStateOf("")
-    var dificulty by mutableStateOf("")
+    var difficulty by mutableStateOf("")
 
     companion object {
         private const val PICK_IMAGE_REQUEST = 1
@@ -118,9 +118,9 @@ class CrearSetaActivity : ComponentActivity() {
         name: String,
         sci_name: String,
         warn_level: Int,
-        dificulty: Int
+        difficulty: Int
     ) {
-        val seta = Seta(img_path, name, sci_name, warn_level, dificulty)
+        val seta = Seta(img_path, name, sci_name, warn_level, difficulty)
         Boletreference.child(sci_name).setValue(seta)
             .addOnSuccessListener {
                 Toast.makeText(this, "Seta añadida correctamente", Toast.LENGTH_SHORT).show()

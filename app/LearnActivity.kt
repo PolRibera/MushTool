@@ -27,11 +27,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.example.lemonade.ui.theme.AppTheme
 import com.google.firebase.database.*
-import android.os.CountDownTimer
 
 class LearnActivity : ComponentActivity() {
     private lateinit var Boletreference: DatabaseReference
-    private var setasGroupedByDifficulty: Map<Int, List<Seta>> = emptyMap()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Boletreference = FirebaseDatabase.getInstance().getReference("Bolet")
@@ -46,15 +45,14 @@ class LearnActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun TestGameApp(context: Context) {
-        var setas by     remember { mutableStateOf<List<Seta>>(emptyList()) }
+        var setas by remember { mutableStateOf<List<Seta>>(emptyList()) }
+        var correctSetaIndex by remember { mutableStateOf(0) }
         var currentQuestionIndex by remember { mutableStateOf(0) }
-        var score by remember { mutableStateOf(0) }
-        var desiredDifficulty by remember { mutableStateOf(1) } // Añade esta línea
 
         LaunchedEffect(true) {
             Boletreference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val newSetas = mutableMapOf<Int, MutableList<Seta>>()
+                    val newSetas = mutableListOf<Seta>()
 
                     for (setaSnapshot in dataSnapshot.children) {
                         val imageUrl = setaSnapshot.child("imageUrl").getValue(String::class.java)
@@ -64,24 +62,11 @@ class LearnActivity : ComponentActivity() {
                         val difficulty = setaSnapshot.child("difficulty").getValue(Int::class.java)
 
                         if (imageUrl != null && name != null && sci_name != null && warn_level != null && difficulty != null) {
-                            val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty)
-                            if (!newSetas.containsKey(difficulty)) {
-                                newSetas[difficulty] = mutableListOf()
-                            }
-                            newSetas[difficulty]?.add(seta)
+                            newSetas.add(Seta(imageUrl, name, sci_name, warn_level, difficulty))
                         }
                     }
 
-                    // Mezcla las setas dentro de cada grupo de dificultad
-                    for ((_, setas) in newSetas) {
-                        setas.shuffle()
-                    }
-
-                    // Asigna el mapa de setas agrupadas y mezcladas a la variable de estado
-                    setasGroupedByDifficulty = newSetas
-
-                    // Actualiza la lista de setas con las setas de la dificultad deseada
-                    setas = setasGroupedByDifficulty[desiredDifficulty] ?: emptyList()
+                    setas = newSetas
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -89,7 +74,6 @@ class LearnActivity : ComponentActivity() {
                 }
             })
         }
-
 
         Scaffold(
             topBar = {
@@ -130,87 +114,44 @@ class LearnActivity : ComponentActivity() {
                     }
                 )
             },
-        )  { innerPadding ->
+        ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     if (currentQuestionIndex < setas.size) {
                         val seta = setas[currentQuestionIndex]
-                        val sameDifficultySetas = setas.filter { it.difficulty == seta.difficulty && it.name != seta.name }
-                        val options = (sameDifficultySetas + seta).shuffled()
+                        val options = setas.map { it.name }.shuffled()
                         val correctOption = seta.name
-
-                        // Añade una cuenta regresiva de 30 segundos
-                        var timer: CountDownTimer? by remember { mutableStateOf(null) }
-                        var timeLeft by remember { mutableStateOf(30000L) }
-
-                        DisposableEffect(Unit) {
-                            timer = object : CountDownTimer(timeLeft, 1000) {
-                                override fun onTick(millisUntilFinished: Long) {
-                                    timeLeft = millisUntilFinished
-                                }
-
-                                override fun onFinish() {
-                                    // Si se acaba el tiempo, considera como si hubieras fallado
-                                    Toast.makeText(
-                                        context,
-                                        "Se acabó el tiempo, tu puntuación es: $score",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    currentQuestionIndex = setas.size // Termina el cuestionario
-                                }
-                            }.start()
-
-                            onDispose {
-                                timer?.cancel()
-                            }
-                        }
 
                         Question(
                             seta = seta,
-                            options = options.map { it.name },
+                            options = options,
                             correctOption = correctOption,
                             onOptionSelected = { selectedOption ->
-                                timer?.cancel() // Reinicia el temporizador al seleccionar una opción
                                 if (selectedOption == correctOption) {
                                     Toast.makeText(
                                         context,
                                         "¡Correcto!",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    score++ // Incrementa la puntuación al responder correctamente
-                                    currentQuestionIndex++ // Pasa a la siguiente pregunta
-
-                                    // Comprueba si quedan más setas en la dificultad actual
-                                    if (currentQuestionIndex >= setas.size) {
-                                        // Si no quedan más setas, incrementa la dificultad
-                                        if (desiredDifficulty < 3) {
-                                            desiredDifficulty++
-                                            setas = setasGroupedByDifficulty[desiredDifficulty] ?: emptyList()
-                                            currentQuestionIndex = 0 // Reinicia el índice de la pregunta para la nueva dificultad
-                                        } else {
-                                            currentQuestionIndex = setas.size // Termina el cuestionario
-                                        }
-                                    }
+                                    currentQuestionIndex++
+                                    correctSetaIndex = (0 until setas.size).random()
                                 } else {
                                     Toast.makeText(
                                         context,
-                                        "Incorrecto, tu puntuación es: $score",
+                                        "Incorrecto, inténtalo de nuevo",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    currentQuestionIndex = setas.size // Termina el cuestionario
                                 }
                             }
                         )
                     } else {
-                        // Todas las preguntas han sido respondidas o el usuario se ha equivocado
-                        Text("¡El cuestionario ha terminado! Tu puntuación es: $score")
+                        // Todas las preguntas han sido respondidas
+                        Text("¡Felicidades, has respondido todas las preguntas!")
                     }
                 }
             }
         }
     }
-
-
 
     @Composable
     fun Question(
@@ -251,4 +192,3 @@ class LearnActivity : ComponentActivity() {
         }
     }
 }
-
