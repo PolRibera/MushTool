@@ -55,7 +55,6 @@ class BusquedaActivity : ComponentActivity() {
         var showDialog by remember { mutableStateOf(false) }
 
         LaunchedEffect(true) {
-            val setas = mutableListOf<Seta>()
 
             Boletreference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {

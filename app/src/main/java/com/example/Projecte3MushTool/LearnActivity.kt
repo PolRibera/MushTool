@@ -247,3 +247,4 @@ class LearnActivity : ComponentActivity() {
         }
     }
 }
+

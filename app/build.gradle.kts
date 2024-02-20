@@ -91,6 +91,8 @@
         implementation("androidx.camera:camera-extensions:1.0.0-alpha31")
         implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
         implementation("com.google.firebase:firebase-analytics")
+        implementation("com.google.android.gms:play-services-location:21.1.0")
+        implementation("androidx.preference:preference-ktx:1.2.1")
         debugImplementation("androidx.compose.ui:ui-test-manifest")
         debugImplementation("androidx.compose.ui:ui-tooling")
         implementation("com.google.firebase:firebase-database-ktx")
