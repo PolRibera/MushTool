@@ -91,6 +91,23 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                                 // Hace que la imagen llene todo el espacio disponible del botón
                             )
                         }
+                        Button(
+                            onClick = {
+                                val intentOtro = Intent(context,  EmailPasswordActivity::class.java)
+                                context.startActivity(intentOtro)
+                            },
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.user_logo),
+                                contentDescription = "Descripción de la imagen",
+                                modifier = Modifier
+                                    .size(30.dp, 30.dp)
+                            )
+                        }
+
                     }
                 }
             )
