@@ -60,6 +60,7 @@ class MapaActivity : AppCompatActivity(), MapListener, GpsStatus.Listener {
             }
         }
 
+
         //marcador
         controller.setZoom(6.0)
         val markerLocation = GeoPoint(41.3851, 2.1734)

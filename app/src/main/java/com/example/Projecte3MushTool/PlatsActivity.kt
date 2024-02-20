@@ -17,6 +17,8 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.IOException
 import java.nio.charset.Charset
 
@@ -24,6 +26,7 @@ class PlatsActivity : ComponentActivity(), MapListener {
 
     private lateinit var mMap: MapView
     private lateinit var controller: IMapController
+    lateinit var mMyLocationOverlay: MyLocationNewOverlay;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +45,22 @@ class PlatsActivity : ComponentActivity(), MapListener {
 
         controller = mMap.controller
 
+        mMyLocationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), mMap)
+        controller = mMap.controller
+
+
+        mMyLocationOverlay.enableMyLocation()
+        mMyLocationOverlay.enableFollowLocation()
+        mMyLocationOverlay.isDrawAccuracyEnabled = true
+
+        mMyLocationOverlay.runOnFirstFix {
+            runOnUiThread {
+                controller.setCenter(mMyLocationOverlay.myLocation)
+                controller.animateTo(mMyLocationOverlay.myLocation)
+            }
+        }
+        
+        mMap.overlays.add(mMyLocationOverlay)
         // Leer marcadores desde el archivo JSON
         val json = loadJSONFromAsset("marcadores.json")
         if (json != null) {
