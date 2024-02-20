@@ -1,5 +1,6 @@
 package com.example.Projecte3MushTool
 
+import PlatsActivity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -31,7 +32,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lemonade.ui.theme.AppTheme
-
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 
 class MainActivity : ComponentActivity() {
@@ -43,7 +45,39 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
+    private fun checkCurrentUser() {
+        // [START check_current_user]
+        val user = Firebase.auth.currentUser
+        if (user != null) {
+            // User is signed in
+        } else {
+            // No user is signed in
+        }
+        // [END check_current_user]
+    }
+
+    private fun getUserProfile() {
+        // [START get_user_profile]
+        val user = Firebase.auth.currentUser
+        user?.let {
+            // Name, email address, and profile photo Url
+            val name = it.displayName
+            val email = it.email
+            val photoUrl = it.photoUrl
+
+            // Check if user's email is verified
+            val emailVerified = it.isEmailVerified
+
+            // The user's ID, unique to the Firebase project. Do NOT use this value to
+            // authenticate with your backend server, if you have one. Use
+            // FirebaseUser.getIdToken() instead.
+            val uid = it.uid
+        }
+        // [END get_user_profile]
+    }
+    }
+
+
 
 
 @Preview(showBackground = true)
@@ -90,6 +124,20 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                                     .size(30.dp, 30.dp) // Tamaño de la imagen
                                 // Hace que la imagen llene todo el espacio disponible del botón
                             )
+                        }
+
+                        // Botón adicional
+                        Button(
+                            onClick = {
+                                // Acción del botón adicional
+                                val intentOtro = Intent(context,  EmailPasswordActivity::class.java)
+                                context.startActivity(intentOtro)
+                            },
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .background(Color(0xFF6B0C0C))
+                        ) {
+                            Text("Otro")
                         }
                     }
                 }
@@ -143,7 +191,7 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                             Image(
                                 painter = painterResource(R.drawable.mapa_logo), // Cambiar con tu recurso
                                 contentDescription = "Descripción de la imagen",
-                                // Hace que la imagen llene todo el espacio disponible del botón
+
                             )
                         }
                     }

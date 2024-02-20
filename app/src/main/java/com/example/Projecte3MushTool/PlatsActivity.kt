@@ -1,113 +1,97 @@
-package com.example.Projecte3MushTool
-
-import android.content.Context
-import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.example.lemonade.ui.theme.AppTheme
+import com.example.Projecte3MushTool.R
+import com.example.Projecte3MushTool.databinding.MapaActivityBinding
+import okhttp3.*
+import org.json.JSONArray
+import org.osmdroid.api.IMapController
+import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import java.io.InputStream
+import org.osmdroid.views.overlay.Marker
+import java.io.IOException
+import java.nio.charset.Charset
 
-class PlatsActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            AppTheme {
-                PlatsApp(this)
-            }
-        }
-    }
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun PlatsApp(context: Context) { // Define el color de los botones aquí
+class PlatsActivity : ComponentActivity(){
+    /*
+        lateinit var mMap: MapView
+        lateinit var controller: IMapController
+*/
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            val binding = MapaActivityBinding.inflate(layoutInflater)
+            setContentView(binding.root)
+        /*
+            Configuration.getInstance().load(
+                applicationContext,
+                getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE)
+            )
+            mMap = binding.osmmap
+            mMap.setTileSource(TileSourceFactory.MAPNIK)
+            mMap.mapCenter
+            mMap.setMultiTouchControls(true)
+            mMap.getLocalVisibleRect(Rect())
 
-        Scaffold(
-            topBar = {
-                // Define tu TopBar aquí
-                TopAppBar(
-                    modifier = Modifier.background(Color(0xFF6B0C0C)),
-                    title = { }, // No se muestra texto en el título de la TopAppBar
-                    actions = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().background(Color(0xFF6B0C0C)),
-                            horizontalArrangement = Arrangement.SpaceBetween // Distribuye los elementos de manera uniforme en la fila
-                        ) {
-                            Text("Mushtool", modifier = Modifier.padding(10.dp).align(Alignment.CenterVertically), color = Color.White) // Texto que se muestra en la esquina izquierda // Texto que se muestra en la esquina izquierda
+            controller = mMap.controller
 
-                            Button(
-                                onClick = {
-                                    val intent = Intent(context, MainActivity::class.java)
-                                    context.startActivity(intent)
-                                },
-                                modifier = Modifier
-                                    // Tamaño del botón
-                                    .align(Alignment.CenterVertically)
-                                    .background(Color(0xFF6B0C0C))
-                            ) {
-                                Image(
-                                    painter = painterResource(R.drawable.boton_exit), // Cambiar con tu recurso
-                                    contentDescription = "Descripción de la imagen",
-                                    modifier = Modifier
-                                        .size(30.dp, 30.dp) // Tamaño de la imagen
-                                    // Hace que la imagen llene todo el espacio disponible del botón
-                                )
-                            }
-                        }
+            // Leer marcadores desde el archivo JSON
+            val json = loadJSONFromAsset("marcadores.json")
+            if (json != null) {
+                try {
+                    val jsonArray = JSONArray(json)
+                    for (i in 0 until jsonArray.length()) {
+                        val jsonObject = jsonArray.getJSONObject(i)
+                        val latitude = jsonObject.getDouble("latitude")
+                        val longitude = jsonObject.getDouble("longitude")
+                        val title = jsonObject.getString("title")
+                        val markerLocation = GeoPoint(latitude, longitude)
+                        val marker = Marker(mMap)
+                        marker.position = markerLocation
+                        marker.title = title
+                        mMap.overlays.add(marker)
                     }
-                )
-            },
-
-            ) { innerPadding ->
-            Box(modifier = Modifier.padding(innerPadding)) {
-                // Aquí puedes colocar el contenido principal de tu aplicación
-
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly // Distribuye los elementos de manera uniforme en la fila
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-                            Text("Plats") // Texto del botón
-                        }
-                    }
+                } catch (e: Exception) {
+                    Log.e("MapaActivity", "Error parsing JSON", e)
                 }
             }
-        }
-    }
 
-    @Preview(showBackground = true)
-    @Composable
-    fun DefaultPreview() {
-        AppTheme {
-            PlatsApp(LocalContext.current)
+            controller.setZoom(6.0)
+
+            mMap.addMapListener(this)*/
         }
-    }
+/*
+        // Función para leer un archivo JSON desde los recursos
+        private fun loadJSONFromAsset(fileName: String): String? {
+            var json: String? = null
+            try {
+                val inputStream: InputStream = assets.open(fileName)
+                val size: Int = inputStream.available()
+                val buffer = ByteArray(size)
+                inputStream.read(buffer)
+                inputStream.close()
+                json = String(buffer, Charset.forName("UTF-8"))
+            } catch (ex: IOException) {
+                ex.printStackTrace()
+                return null
+            }
+            return json
+        }
+
+        override fun onScroll(event: ScrollEvent?): Boolean {
+            Log.e("TAG", "onCreate:la ${event?.source?.mapCenter?.latitude}")
+            Log.e("TAG", "onCreate:lo ${event?.source?.mapCenter?.longitude}")
+            return true
+        }
+
+        override fun onZoom(event: ZoomEvent?): Boolean {
+            Log.e("TAG", "onZoom zoom level: ${event?.zoomLevel}   source:  ${event?.source}")
+            return false;
+        }*/
 }
-
