@@ -45,38 +45,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    private fun checkCurrentUser() {
-        // [START check_current_user]
-        val user = Firebase.auth.currentUser
-        if (user != null) {
-            // User is signed in
-        } else {
-            // No user is signed in
-        }
-        // [END check_current_user]
-    }
-
-    private fun getUserProfile() {
-        // [START get_user_profile]
-        val user = Firebase.auth.currentUser
-        user?.let {
-            // Name, email address, and profile photo Url
-            val name = it.displayName
-            val email = it.email
-            val photoUrl = it.photoUrl
-
-            // Check if user's email is verified
-            val emailVerified = it.isEmailVerified
-
-            // The user's ID, unique to the Firebase project. Do NOT use this value to
-            // authenticate with your backend server, if you have one. Use
-            // FirebaseUser.getIdToken() instead.
-            val uid = it.uid
-        }
-        // [END get_user_profile]
-    }
-    }
-
+}
 
 
 
@@ -103,7 +72,7 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                 actions = {
                     Row(
                         modifier = Modifier.fillMaxWidth().background(Color(0xFF6B0C0C)),
-                        horizontalArrangement = Arrangement.SpaceBetween // Distribuye los elementos de manera uniforme en la fila
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Mushtool", modifier = Modifier.padding(10.dp).align(Alignment.CenterVertically), color = Color.White) // Texto que se muestra en la esquina izquierda // Texto que se muestra en la esquina izquierda
 
@@ -115,37 +84,37 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                             modifier = Modifier
                                 // Tamaño del botón
                                 .align(Alignment.CenterVertically)
-                                .background(Color(0xFF6B0C0C))
                         ) {
                             Image(
                                 painter = painterResource(R.drawable.config), // Cambiar con tu recurso
                                 contentDescription = "Descripción de la imagen",
                                 modifier = Modifier
-                                    .size(30.dp, 30.dp) // Tamaño de la imagen
-                                // Hace que la imagen llene todo el espacio disponible del botón
+                                    .size(30.dp, 30.dp)
                             )
                         }
 
-                        // Botón adicional
                         Button(
                             onClick = {
-                                // Acción del botón adicional
                                 val intentOtro = Intent(context,  EmailPasswordActivity::class.java)
                                 context.startActivity(intentOtro)
                             },
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
-                                .background(Color(0xFF6B0C0C))
+
                         ) {
-                            Text("Otro")
+                            Image(
+                                painter = painterResource(R.drawable.user_logo),
+                                contentDescription = "Descripción de la imagen",
+                                modifier = Modifier
+                                    .size(30.dp, 30.dp)
+                                )
                         }
                     }
                 }
             )
         },
-        bottomBar = { // Define tu BottomBar aquí
+        bottomBar = {
             BottomAppBar(
-                // Usa el mismo color para la BottomAppBar
             ) {
                 Row(
                     modifier = Modifier

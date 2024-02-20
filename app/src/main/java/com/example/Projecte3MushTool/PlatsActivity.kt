@@ -19,16 +19,16 @@ import org.osmdroid.views.overlay.Marker
 import java.io.IOException
 import java.nio.charset.Charset
 
-class PlatsActivity : ComponentActivity(){
-    /*
+class PlatsActivity : ComponentActivity(), MapListener {
+
         lateinit var mMap: MapView
         lateinit var controller: IMapController
-*/
+
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             val binding = MapaActivityBinding.inflate(layoutInflater)
             setContentView(binding.root)
-        /*
+
             Configuration.getInstance().load(
                 applicationContext,
                 getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE)
@@ -64,9 +64,9 @@ class PlatsActivity : ComponentActivity(){
 
             controller.setZoom(6.0)
 
-            mMap.addMapListener(this)*/
+            mMap.addMapListener(this)
         }
-/*
+
         // Función para leer un archivo JSON desde los recursos
         private fun loadJSONFromAsset(fileName: String): String? {
             var json: String? = null
@@ -93,5 +93,5 @@ class PlatsActivity : ComponentActivity(){
         override fun onZoom(event: ZoomEvent?): Boolean {
             Log.e("TAG", "onZoom zoom level: ${event?.zoomLevel}   source:  ${event?.source}")
             return false;
-        }*/
+        }
 }
