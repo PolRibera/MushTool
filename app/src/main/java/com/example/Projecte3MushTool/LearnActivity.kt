@@ -27,11 +27,14 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.example.lemonade.ui.theme.AppTheme
 import com.google.firebase.database.*
-import android.os.CountDownTimer
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class LearnActivity : ComponentActivity() {
     private lateinit var Boletreference: DatabaseReference
     private var setasGroupedByDifficulty: Map<Int, List<Seta>> = emptyMap()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Boletreference = FirebaseDatabase.getInstance().getReference("Bolet")
@@ -46,15 +49,18 @@ class LearnActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun TestGameApp(context: Context) {
-        var setas by     remember { mutableStateOf<List<Seta>>(emptyList()) }
+        var setas by remember { mutableStateOf<List<Seta>>(emptyList()) }
         var currentQuestionIndex by remember { mutableStateOf(0) }
         var score by remember { mutableStateOf(0) }
-        var desiredDifficulty by remember { mutableStateOf(1) } // Añade esta línea
+        var desiredDifficulty by remember { mutableStateOf(1) }
+        var countdown by remember { mutableStateOf(10) }
 
         LaunchedEffect(true) {
             Boletreference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val newSetas = mutableMapOf<Int, MutableList<Seta>>()
+                    val setasDifficulty1 = mutableListOf<Seta>()
+                    val setasDifficulty2 = mutableListOf<Seta>()
+                    val setasDifficulty3 = mutableListOf<Seta>()
 
                     for (setaSnapshot in dataSnapshot.children) {
                         val imageUrl = setaSnapshot.child("imageUrl").getValue(String::class.java)
@@ -65,20 +71,25 @@ class LearnActivity : ComponentActivity() {
 
                         if (imageUrl != null && name != null && sci_name != null && warn_level != null && difficulty != null) {
                             val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty)
-                            if (!newSetas.containsKey(difficulty)) {
-                                newSetas[difficulty] = mutableListOf()
+                            when (difficulty) {
+                                1 -> setasDifficulty1.add(seta)
+                                2 -> setasDifficulty2.add(seta)
+                                3 -> setasDifficulty3.add(seta)
                             }
-                            newSetas[difficulty]?.add(seta)
                         }
                     }
 
                     // Mezcla las setas dentro de cada grupo de dificultad
-                    for ((_, setas) in newSetas) {
-                        setas.shuffle()
-                    }
+                    setasDifficulty1.shuffle()
+                    setasDifficulty2.shuffle()
+                    setasDifficulty3.shuffle()
 
-                    // Asigna el mapa de setas agrupadas y mezcladas a la variable de estado
-                    setasGroupedByDifficulty = newSetas
+                    // Asigna las listas de setas agrupadas y mezcladas a la variable de estado
+                    setasGroupedByDifficulty = mapOf(
+                        1 to setasDifficulty1,
+                        2 to setasDifficulty2,
+                        3 to setasDifficulty3
+                    )
 
                     // Actualiza la lista de setas con las setas de la dificultad deseada
                     setas = setasGroupedByDifficulty[desiredDifficulty] ?: emptyList()
@@ -130,65 +141,53 @@ class LearnActivity : ComponentActivity() {
                     }
                 )
             },
-        )  { innerPadding ->
+        ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 Column(modifier = Modifier.padding(16.dp)) {
+                    // Nuevo bloque para el contador fuera del cuestionario
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Contador: $countdown")
+
+                        // disminuye el contador cada segundo
+                        LaunchedEffect(key1 = countdown) {
+                            while (countdown > 0) {
+                                delay(1000L)
+                            }
+                        }
+                    }
+
                     if (currentQuestionIndex < setas.size) {
                         val seta = setas[currentQuestionIndex]
                         val sameDifficultySetas = setas.filter { it.difficulty == seta.difficulty && it.name != seta.name }
                         val options = (sameDifficultySetas + seta).shuffled()
                         val correctOption = seta.name
 
-                        // Añade una cuenta regresiva de 30 segundos
-                        var timer: CountDownTimer? by remember { mutableStateOf(null) }
-                        var timeLeft by remember { mutableStateOf(30000L) }
-
-                        DisposableEffect(Unit) {
-                            timer = object : CountDownTimer(timeLeft, 1000) {
-                                override fun onTick(millisUntilFinished: Long) {
-                                    timeLeft = millisUntilFinished
-                                }
-
-                                override fun onFinish() {
-                                    // Si se acaba el tiempo, considera como si hubieras fallado
-                                    Toast.makeText(
-                                        context,
-                                        "Se acabó el tiempo, tu puntuación es: $score",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    currentQuestionIndex = setas.size // Termina el cuestionario
-                                }
-                            }.start()
-
-                            onDispose {
-                                timer?.cancel()
-                            }
-                        }
-
                         Question(
                             seta = seta,
                             options = options.map { it.name },
                             correctOption = correctOption,
                             onOptionSelected = { selectedOption ->
-                                timer?.cancel() // Reinicia el temporizador al seleccionar una opción
                                 if (selectedOption == correctOption) {
                                     Toast.makeText(
                                         context,
                                         "¡Correcto!",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    score++ // Incrementa la puntuación al responder correctamente
-                                    currentQuestionIndex++ // Pasa a la siguiente pregunta
+                                    score++
+                                    currentQuestionIndex++
 
-                                    // Comprueba si quedan más setas en la dificultad actual
                                     if (currentQuestionIndex >= setas.size) {
-                                        // Si no quedan más setas, incrementa la dificultad
                                         if (desiredDifficulty < 3) {
                                             desiredDifficulty++
                                             setas = setasGroupedByDifficulty[desiredDifficulty] ?: emptyList()
-                                            currentQuestionIndex = 0 // Reinicia el índice de la pregunta para la nueva dificultad
+                                            currentQuestionIndex = 0
                                         } else {
-                                            currentQuestionIndex = setas.size // Termina el cuestionario
+                                            currentQuestionIndex = setas.size
                                         }
                                     }
                                 } else {
@@ -197,12 +196,11 @@ class LearnActivity : ComponentActivity() {
                                         "Incorrecto, tu puntuación es: $score",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    currentQuestionIndex = setas.size // Termina el cuestionario
+                                    currentQuestionIndex = setas.size
                                 }
                             }
                         )
                     } else {
-                        // Todas las preguntas han sido respondidas o el usuario se ha equivocado
                         Text("¡El cuestionario ha terminado! Tu puntuación es: $score")
                     }
                 }
@@ -210,15 +208,13 @@ class LearnActivity : ComponentActivity() {
         }
     }
 
-
-
     @Composable
     fun Question(
         seta: Seta,
         options: List<String>,
         correctOption: String,
         onOptionSelected: (String) -> Unit
-    ) {
+    ){
         Column(modifier = Modifier.padding(8.dp)) {
             Image(
                 painter = rememberImagePainter(seta.imageUrl),
@@ -251,4 +247,3 @@ class LearnActivity : ComponentActivity() {
         }
     }
 }
-
