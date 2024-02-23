@@ -1,6 +1,5 @@
 package com.example.Projecte3MushTool
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -9,23 +8,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,12 +24,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import com.example.lemonade.ui.theme.AppTheme
-import androidx.compose.foundation.layout.Column as Column1
+import com.google.firebase.database.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class LearnActivity : ComponentActivity() {
+    private lateinit var Boletreference: DatabaseReference
+    private var setasGroupedByDifficulty: Map<Int, List<Seta>> = emptyMap()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Boletreference = FirebaseDatabase.getInstance().getReference("Bolet")
+
         setContent {
             AppTheme {
                 TestGameApp(this)
@@ -47,23 +47,80 @@ class LearnActivity : ComponentActivity() {
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @Composable
     fun TestGameApp(context: Context) {
-        val setas = listOf("Seta 1", "Seta 2", "Seta 3", "Seta 4")
-        var correctSeta by remember { mutableStateOf((0..3).random()) }
+        var setas by remember { mutableStateOf<List<Seta>>(emptyList()) }
+        var currentQuestionIndex by remember { mutableStateOf(0) }
+        var score by remember { mutableStateOf(0) }
+        var desiredDifficulty by remember { mutableStateOf(1) }
+        var countdown by remember { mutableStateOf(10) }
+
+        LaunchedEffect(true) {
+            Boletreference.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val setasDifficulty1 = mutableListOf<Seta>()
+                    val setasDifficulty2 = mutableListOf<Seta>()
+                    val setasDifficulty3 = mutableListOf<Seta>()
+
+                    for (setaSnapshot in dataSnapshot.children) {
+                        val imageUrl = setaSnapshot.child("imageUrl").getValue(String::class.java)
+                        val name = setaSnapshot.child("name").getValue(String::class.java)
+                        val sci_name = setaSnapshot.child("sci_name").getValue(String::class.java)
+                        val warn_level = setaSnapshot.child("warn_level").getValue(Int::class.java)
+                        val difficulty = setaSnapshot.child("difficulty").getValue(Int::class.java)
+
+                        if (imageUrl != null && name != null && sci_name != null && warn_level != null && difficulty != null) {
+                            val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty)
+                            when (difficulty) {
+                                1 -> setasDifficulty1.add(seta)
+                                2 -> setasDifficulty2.add(seta)
+                                3 -> setasDifficulty3.add(seta)
+                            }
+                        }
+                    }
+
+                    // Mezcla las setas dentro de cada grupo de dificultad
+                    setasDifficulty1.shuffle()
+                    setasDifficulty2.shuffle()
+                    setasDifficulty3.shuffle()
+
+                    // Asigna las listas de setas agrupadas y mezcladas a la variable de estado
+                    setasGroupedByDifficulty = mapOf(
+                        1 to setasDifficulty1,
+                        2 to setasDifficulty2,
+                        3 to setasDifficulty3
+                    )
+
+                    // Actualiza la lista de setas con las setas de la dificultad deseada
+                    setas = setasGroupedByDifficulty[desiredDifficulty] ?: emptyList()
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    // Maneja posibles errores.
+                }
+            })
+        }
+
+
         Scaffold(
             topBar = {
-                // Define tu TopBar aquí
                 TopAppBar(
                     modifier = Modifier.background(Color(0xFF6B0C0C)),
-                    title = { }, // No se muestra texto en el título de la TopAppBar
+                    title = { },
                     actions = {
                         Row(
-                            modifier = Modifier.fillMaxWidth().background(Color(0xFF6B0C0C)),
-                            horizontalArrangement = Arrangement.SpaceBetween // Distribuye los elementos de manera uniforme en la fila
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF6B0C0C)),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Mushtool", modifier = Modifier.padding(10.dp).align(Alignment.CenterVertically), color = Color.White) // Texto que se muestra en la esquina izquierda // Texto que se muestra en la esquina izquierda
+                            Text(
+                                "Mushtool",
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .align(Alignment.CenterVertically),
+                                color = Color.White
+                            )
 
                             Button(
                                 onClick = {
@@ -71,59 +128,115 @@ class LearnActivity : ComponentActivity() {
                                     context.startActivity(intent)
                                 },
                                 modifier = Modifier
-                                    // Tamaño del botón
                                     .align(Alignment.CenterVertically)
                                     .background(Color(0xFF6B0C0C))
                             ) {
                                 Image(
-                                    painter = painterResource(R.drawable.boton_exit), // Cambiar con tu recurso
-                                    contentDescription = "Descripción de la imagen",
-                                    modifier = Modifier
-                                        .size(30.dp, 30.dp) // Tamaño de la imagen
-                                    // Hace que la imagen llene todo el espacio disponible del botón
+                                    painter = painterResource(R.drawable.boton_exit),
+                                    contentDescription = "Exit Button",
+                                    modifier = Modifier.size(30.dp, 30.dp)
                                 )
                             }
                         }
                     }
                 )
             },
-
-            ) { innerPadding ->
+        ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
-                Column1(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("¿Cuál es la seta comestible?")
+                Column(modifier = Modifier.padding(16.dp)) {
+                    // Nuevo bloque para el contador fuera del cuestionario
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Contador: $countdown")
 
-                    setas.forEachIndexed { index, seta ->
-                        Button(
-                            onClick = {
-                                if (index == correctSeta) {
-                                    Toast.makeText(context, "¡Correcto!", Toast.LENGTH_SHORT).show()
-                                    correctSeta = (0..3).random()
+                        // disminuye el contador cada segundo
+                        LaunchedEffect(key1 = countdown) {
+                            while (countdown > 0) {
+                                delay(1000L)
+                            }
+                        }
+                    }
+
+                    if (currentQuestionIndex < setas.size) {
+                        val seta = setas[currentQuestionIndex]
+                        val sameDifficultySetas = setas.filter { it.difficulty == seta.difficulty && it.name != seta.name }
+                        val options = (sameDifficultySetas + seta).shuffled()
+                        val correctOption = seta.name
+
+                        Question(
+                            seta = seta,
+                            options = options.map { it.name },
+                            correctOption = correctOption,
+                            onOptionSelected = { selectedOption ->
+                                if (selectedOption == correctOption) {
+                                    Toast.makeText(
+                                        context,
+                                        "¡Correcto!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    score++
+                                    currentQuestionIndex++
+
+                                    if (currentQuestionIndex >= setas.size) {
+                                        if (desiredDifficulty < 3) {
+                                            desiredDifficulty++
+                                            setas = setasGroupedByDifficulty[desiredDifficulty] ?: emptyList()
+                                            currentQuestionIndex = 0
+                                        } else {
+                                            currentQuestionIndex = setas.size
+                                        }
+                                    }
                                 } else {
                                     Toast.makeText(
                                         context,
-                                        "Incorrecto, inténtalo de nuevo",
+                                        "Incorrecto, tu puntuación es: $score",
                                         Toast.LENGTH_SHORT
                                     ).show()
+                                    currentQuestionIndex = setas.size
                                 }
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(if (index == correctSeta) Color.Green else Color.Gray)
-                        ) {
-                            Text(seta, color = Color.White)
-                        }
+                            }
+                        )
+                    } else {
+                        Text("¡El cuestionario ha terminado! Tu puntuación es: $score")
                     }
                 }
             }
         }
+    }
 
+    @Composable
+    fun Question(
+        seta: Seta,
+        options: List<String>,
+        correctOption: String,
+        onOptionSelected: (String) -> Unit
+    ){
+        Column(modifier = Modifier.padding(8.dp)) {
+            Image(
+                painter = rememberImagePainter(seta.imageUrl),
+                contentDescription = seta.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            options.forEach { option ->
+                Button(
+                    onClick = { onOptionSelected(option) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                ) {
+                    Text(text = option)
+                }
+            }
+        }
     }
 
     @Preview(showBackground = true)
@@ -134,3 +247,4 @@ class LearnActivity : ComponentActivity() {
         }
     }
 }
+

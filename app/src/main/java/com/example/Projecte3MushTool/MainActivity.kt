@@ -46,6 +46,16 @@ class MainActivity : ComponentActivity() {
 }
 
 
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    AppTheme {
+        LemonadeApp(LocalContext.current)
+    }
+}
+
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LemonadeApp(context: Context) { // Define el color de los botones aquí
@@ -69,7 +79,7 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                                 context.startActivity(intentConfig)
                             },
                             modifier = Modifier
-                                 // Tamaño del botón
+                                // Tamaño del botón
                                 .align(Alignment.CenterVertically)
                                 .background(Color(0xFF6B0C0C))
                         ) {
@@ -81,6 +91,23 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                                 // Hace que la imagen llene todo el espacio disponible del botón
                             )
                         }
+                        Button(
+                            onClick = {
+                                val intentOtro = Intent(context,  EmailPasswordActivity::class.java)
+                                context.startActivity(intentOtro)
+                            },
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.user_logo),
+                                contentDescription = "Descripción de la imagen",
+                                modifier = Modifier
+                                    .size(30.dp, 30.dp)
+                            )
+                        }
+
                     }
                 }
             )
@@ -215,7 +242,7 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Button(
-                            onClick = {  val intentPLats = Intent(context, FotosActivity::class.java)
+                            onClick = {  val intentPLats = Intent(context, ListarPostsActivity::class.java)
                                 context.startActivity(intentPLats) },
                             modifier = Modifier
                                 .padding(10.dp)
@@ -224,21 +251,11 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                             ,// Tamaño cuadrado del botón
                             // Agrega espacio alrededor del botón
                         ) {
-                            Text("Fotos Comunitat") // Texto del botón
+                            Text("Posts") // Texto del botón
                         }
                     }
                 }
             }
         }
-    }
-}
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    AppTheme {
-        LemonadeApp(LocalContext.current)
     }
 }
