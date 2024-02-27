@@ -24,6 +24,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,62 +46,57 @@ import com.google.firebase.database.ValueEventListener
 class MainActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var userReference: DatabaseReference
+    private var username by mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
         userReference = FirebaseDatabase.getInstance().getReference("Usuari")
 
-        val user = auth.currentUser
-        val uid = user?.uid
-        var username = ""
-        if (uid != null) {
-            userReference.addValueEventListener(object :  ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val userBD = dataSnapshot.child(uid)
-                    username = userBD.child("username").getValue(String::class.java).toString()
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    // Handle cancellation
-                }
-            })
-        }
-
         setContent {
             AppTheme {
-                LemonadeApp(this, auth, username)
+                LemonadeApp(this, auth)
             }
         }
     }
 
-    // Método para reiniciar MainActivity
-    fun restartActivity() {
+    override fun onResume() {
+        super.onResume()
+        val uid = auth.uid
+
+        if (uid != null) {
+            updateUsername(uid)
+        }
+    }
+    private fun restartActivity() {
         val intent = intent
         finish()
         startActivity(intent)
     }
-}
 
+    private fun updateUsername(uid : String) {
+        userReference.child(uid).child("username").addListenerForSingleValueEvent(
+            object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val fetchedUsername = snapshot.getValue(String::class.java)
+                    if (!fetchedUsername.isNullOrEmpty()) {
+                        username = fetchedUsername
+                    }
+                }
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    lateinit var auth: FirebaseAuth
-    auth = FirebaseAuth.getInstance()
-    AppTheme {
-        LemonadeApp(LocalContext.current, auth, "username")
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle error
+                    Toast.makeText(applicationContext, "Error fetching username", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
     }
-}
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LemonadeApp(context: Context, auth: FirebaseAuth, username: String) {
-    val user = auth.currentUser
-    val uid = user?.uid
-
+fun LemonadeApp(context: Context, auth: FirebaseAuth) {
+    val uid = auth.uid
     Scaffold(
         topBar = {
             TopAppBar(
@@ -111,12 +109,12 @@ fun LemonadeApp(context: Context, auth: FirebaseAuth, username: String) {
                             .background(Color(0xFF6B0C0C)),
                         horizontalArrangement = Arrangement.SpaceBetween // Distribuye los elementos de manera uniforme en la fila
                     ) {
-                        Text(
-                            username, modifier = Modifier
-                                .padding(10.dp)
-                                .align(Alignment.CenterVertically), color = Color.White
-                        ) // Texto que se muestra en la esquina izquierda // Texto que se muestra en la esquina izquierda
-                        if (uid != null) {
+                        if (!uid.isNullOrEmpty()) {
+                            Text(
+                                username, modifier = Modifier
+                                    .padding(10.dp)
+                                    .align(Alignment.CenterVertically), color = Color.White
+                            )
                             Button(
                                 onClick = {
                                     auth.signOut()
@@ -273,8 +271,7 @@ fun LemonadeApp(context: Context, auth: FirebaseAuth, username: String) {
                             modifier = Modifier
                                 .padding(10.dp)
                                 .size(240.dp, 100.dp)
-                                .background(Color(0xFF6B0C0C))
-                            ,// Tamaño cuadrado del botón
+                                .background(Color(0xFF6B0C0C)),// Tamaño cuadrado del botón
                             // Agrega espacio alrededor del botón
                         ) {
                             Text("Mensajes") // Texto del botón
@@ -294,8 +291,7 @@ fun LemonadeApp(context: Context, auth: FirebaseAuth, username: String) {
                             modifier = Modifier
                                 .padding(10.dp)
                                 .size(240.dp, 100.dp)
-                                .background(Color(0xFF6B0C0C))
-                            ,// Tamaño cuadrado del botón
+                                .background(Color(0xFF6B0C0C)),// Tamaño cuadrado del botón
                             // Agrega espacio alrededor del botón
                         ) {
                             Text("Posts") // Texto del botón
@@ -305,4 +301,9 @@ fun LemonadeApp(context: Context, auth: FirebaseAuth, username: String) {
             }
         }
     }
+    }
 }
+
+
+
+
