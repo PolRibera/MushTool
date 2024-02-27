@@ -3,6 +3,7 @@ package com.example.Projecte3MushTool
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -31,17 +32,51 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lemonade.ui.theme.AppTheme
-
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 
 class MainActivity : ComponentActivity() {
+    private lateinit var auth: FirebaseAuth
+    private lateinit var userReference: DatabaseReference
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        auth = FirebaseAuth.getInstance()
+        userReference = FirebaseDatabase.getInstance().getReference("Usuari")
+
+        val user = auth.currentUser
+        val uid = user?.uid
+        var username = ""
+        if (uid != null) {
+            userReference.addValueEventListener(object :  ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val userBD = dataSnapshot.child(uid)
+                    username = userBD.child("username").getValue(String::class.java).toString()
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle cancellation
+                }
+            })
+        }
+
         setContent {
             AppTheme {
-                LemonadeApp(this)
+                LemonadeApp(this, auth, username)
             }
         }
+    }
+
+    // Método para reiniciar MainActivity
+    fun restartActivity() {
+        val intent = intent
+        finish()
+        startActivity(intent)
     }
 }
 
@@ -49,8 +84,10 @@ class MainActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
+    lateinit var auth: FirebaseAuth
+    auth = FirebaseAuth.getInstance()
     AppTheme {
-        LemonadeApp(LocalContext.current)
+        LemonadeApp(LocalContext.current, auth, "username")
     }
 }
 
@@ -58,61 +95,62 @@ fun DefaultPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LemonadeApp(context: Context) { // Define el color de los botones aquí
+fun LemonadeApp(context: Context, auth: FirebaseAuth, username: String) {
+    val user = auth.currentUser
+    val uid = user?.uid
 
     Scaffold(
         topBar = {
-            // Define tu TopBar aquí
             TopAppBar(
                 modifier = Modifier.background(Color(0xFF6B0C0C)),
                 title = { }, // No se muestra texto en el título de la TopAppBar
                 actions = {
                     Row(
-                        modifier = Modifier.fillMaxWidth().background(Color(0xFF6B0C0C)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFF6B0C0C)),
                         horizontalArrangement = Arrangement.SpaceBetween // Distribuye los elementos de manera uniforme en la fila
                     ) {
-                        Text("Mushtool", modifier = Modifier.padding(10.dp).align(Alignment.CenterVertically), color = Color.White) // Texto que se muestra en la esquina izquierda // Texto que se muestra en la esquina izquierda
-
-                        Button(
-                            onClick = {
-                                val intentConfig = Intent(context, ConfigActivity::class.java)
-                                context.startActivity(intentConfig)
-                            },
-                            modifier = Modifier
-                                // Tamaño del botón
-                                .align(Alignment.CenterVertically)
-                                .background(Color(0xFF6B0C0C))
-                        ) {
-                            Image(
-                                painter = painterResource(R.drawable.config), // Cambiar con tu recurso
-                                contentDescription = "Descripción de la imagen",
+                        Text(
+                            username, modifier = Modifier
+                                .padding(10.dp)
+                                .align(Alignment.CenterVertically), color = Color.White
+                        ) // Texto que se muestra en la esquina izquierda // Texto que se muestra en la esquina izquierda
+                        if (uid != null) {
+                            Button(
+                                onClick = {
+                                    auth.signOut()
+                                    Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show()
+                                    (context as MainActivity).restartActivity() // Reiniciar MainActivity después del cierre de sesión
+                                },
                                 modifier = Modifier
-                                    .size(30.dp, 30.dp) // Tamaño de la imagen
-                                // Hace que la imagen llene todo el espacio disponible del botón
-                            )
-                        }
-                        Button(
-                            onClick = {
-                                val intentOtro = Intent(context,  EmailPasswordActivity::class.java)
-                                context.startActivity(intentOtro)
-                            },
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-
-                        ) {
-                            Image(
-                                painter = painterResource(R.drawable.user_logo),
-                                contentDescription = "Descripción de la imagen",
+                                    .align(Alignment.CenterVertically)
+                                    .background(Color(0xFF6B0C0C))
+                            ) {
+                                Text("Logout", color = Color.White)
+                            }
+                        } else {
+                            Button(
+                                onClick = {
+                                    val intentOtro = Intent(context, LoginActivity::class.java)
+                                    context.startActivity(intentOtro)
+                                },
                                 modifier = Modifier
-                                    .size(30.dp, 30.dp)
-                            )
+                                    .align(Alignment.CenterVertically)
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.user_logo),
+                                    contentDescription = "Descripción de la imagen",
+                                    modifier = Modifier
+                                        .size(30.dp, 30.dp)
+                                )
+                            }
                         }
-
                     }
                 }
             )
         },
-        bottomBar = { // Define tu BottomBar aquí
+        bottomBar = {
             BottomAppBar(
                 // Usa el mismo color para la BottomAppBar
             ) {
@@ -131,7 +169,6 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                             onClick = {
                                 val intentBus = Intent(context, BusquedaActivity::class.java)
                                 context.startActivity(intentBus)
-
                             },
                             modifier = Modifier
                                 .background(Color(0xFF6B0C0C))
@@ -150,8 +187,10 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                         modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
                     ) {
                         Button(
-                            onClick = { val intentMapa = Intent(context, MapaActivity::class.java)
-                                context.startActivity(intentMapa) },
+                            onClick = {
+                                val intentMapa = Intent(context, MapaActivity::class.java)
+                                context.startActivity(intentMapa)
+                            },
                             modifier = Modifier
                                 .background(Color(0xFF6B0C0C))
                                 .fillMaxHeight(),// Tamaño cuadrado del botón
@@ -170,8 +209,10 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                         modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
                     ) {
                         Button(
-                            onClick = { val intentLearn = Intent(context, LearnActivity::class.java)
-                                context.startActivity(intentLearn) },
+                            onClick = {
+                                val intentLearn = Intent(context, LearnActivity::class.java)
+                                context.startActivity(intentLearn)
+                            },
                             modifier = Modifier
                                 .background(Color(0xFF6B0C0C))
                                 .fillMaxHeight(),// Tamaño cuadrado del botón
@@ -190,8 +231,10 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                         modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
                     ) {
                         Button(
-                            onClick = { val intentPLats = Intent(context, PlatsActivity::class.java)
-                                context.startActivity(intentPLats) },
+                            onClick = {
+                                val intentPLats = Intent(context, PlatsActivity::class.java)
+                                context.startActivity(intentPLats)
+                            },
                             modifier = Modifier
                                 .background(Color(0xFF6B0C0C))
                                 .fillMaxHeight() // Tamaño cuadrado del botón // Agrega espacio alrededor del botón
@@ -223,8 +266,10 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Button(
-                            onClick = {  val intentPLats = Intent(context, MensajesActivity::class.java)
-                                context.startActivity(intentPLats)},
+                            onClick = {
+                                val intentPLats = Intent(context, MensajesActivity::class.java)
+                                context.startActivity(intentPLats)
+                            },
                             modifier = Modifier
                                 .padding(10.dp)
                                 .size(240.dp, 100.dp)
@@ -242,8 +287,10 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Button(
-                            onClick = {  val intentPLats = Intent(context, ListarPostsActivity::class.java)
-                                context.startActivity(intentPLats) },
+                            onClick = {
+                                val intentPLats = Intent(context, ListarPostsActivity::class.java)
+                                context.startActivity(intentPLats)
+                            },
                             modifier = Modifier
                                 .padding(10.dp)
                                 .size(240.dp, 100.dp)

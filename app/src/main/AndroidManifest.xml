@@ -37,8 +37,13 @@
             android:name=".CrearSetaActivity"
             android:exported="false" />
         <activity
-            android:name=".EmailPasswordActivity"
+            android:name=".LoginActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false" />
+
 
         <activity
             android:name=".ListarPostsActivity"
