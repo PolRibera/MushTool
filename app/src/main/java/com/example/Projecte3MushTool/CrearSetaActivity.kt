@@ -14,6 +14,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -44,7 +45,7 @@ class CrearSetaActivity : ComponentActivity() {
     var name by mutableStateOf("")
     var sciName by mutableStateOf("")
     var warnLevel by mutableStateOf("")
-    var dificulty by mutableStateOf("")
+    var difficulty by mutableStateOf("")
 
     companion object {
         private const val PICK_IMAGE_REQUEST = 1
@@ -118,9 +119,9 @@ class CrearSetaActivity : ComponentActivity() {
         name: String,
         sci_name: String,
         warn_level: Int,
-        dificulty: Int
+        difficulty: Int
     ) {
-        val seta = Seta(img_path, name, sci_name, warn_level, dificulty)
+        val seta = Seta(img_path, name, sci_name, warn_level, difficulty)
         Boletreference.child(sci_name).setValue(seta)
             .addOnSuccessListener {
                 Toast.makeText(this, "Seta añadida correctamente", Toast.LENGTH_SHORT).show()
@@ -164,6 +165,7 @@ class CrearSetaActivity : ComponentActivity() {
                                     val intent = Intent(context, MainActivity::class.java)
                                     context.startActivity(intent)
                                 },
+                                colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically)
                                     .background(Color(0xFF6B0C0C))
@@ -224,7 +226,7 @@ class CrearSetaActivity : ComponentActivity() {
                             )
                             startActivityForResult(intent, PICK_IMAGE_REQUEST)
 
-                        },
+                        },colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),
                         modifier = Modifier
                             .padding(16.dp)
                             .background(Color(0xFF6B0C0C))
@@ -255,7 +257,7 @@ class CrearSetaActivity : ComponentActivity() {
                             )
                             val intent = Intent(context, BusquedaActivity::class.java)
                             context.startActivity(intent)
-                        }, modifier = Modifier
+                        }, colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),modifier = Modifier
                             .padding(16.dp)
                             .background(Color(0xFF6B0C0C))
                     ) {

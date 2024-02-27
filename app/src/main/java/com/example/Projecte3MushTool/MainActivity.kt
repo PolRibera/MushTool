@@ -31,8 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lemonade.ui.theme.AppTheme
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
+
 
 
 class MainActivity : ComponentActivity() {
@@ -45,7 +44,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 
 
 @Preview(showBackground = true)
@@ -71,7 +69,7 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                 actions = {
                     Row(
                         modifier = Modifier.fillMaxWidth().background(Color(0xFF6B0C0C)),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween // Distribuye los elementos de manera uniforme en la fila
                     ) {
                         Text("Mushtool", modifier = Modifier.padding(10.dp).align(Alignment.CenterVertically), color = Color.White) // Texto que se muestra en la esquina izquierda // Texto que se muestra en la esquina izquierda
 
@@ -83,15 +81,16 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                             modifier = Modifier
                                 // Tamaño del botón
                                 .align(Alignment.CenterVertically)
+                                .background(Color(0xFF6B0C0C))
                         ) {
                             Image(
                                 painter = painterResource(R.drawable.config), // Cambiar con tu recurso
                                 contentDescription = "Descripción de la imagen",
                                 modifier = Modifier
-                                    .size(30.dp, 30.dp)
+                                    .size(30.dp, 30.dp) // Tamaño de la imagen
+                                // Hace que la imagen llene todo el espacio disponible del botón
                             )
                         }
-
                         Button(
                             onClick = {
                                 val intentOtro = Intent(context,  EmailPasswordActivity::class.java)
@@ -106,14 +105,16 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                                 contentDescription = "Descripción de la imagen",
                                 modifier = Modifier
                                     .size(30.dp, 30.dp)
-                                )
+                            )
                         }
+
                     }
                 }
             )
         },
-        bottomBar = {
+        bottomBar = { // Define tu BottomBar aquí
             BottomAppBar(
+                // Usa el mismo color para la BottomAppBar
             ) {
                 Row(
                     modifier = Modifier
@@ -159,7 +160,7 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                             Image(
                                 painter = painterResource(R.drawable.mapa_logo), // Cambiar con tu recurso
                                 contentDescription = "Descripción de la imagen",
-
+                                // Hace que la imagen llene todo el espacio disponible del botón
                             )
                         }
                     }
@@ -241,7 +242,7 @@ fun LemonadeApp(context: Context) { // Define el color de los botones aquí
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Button(
-                            onClick = {  val intentPLats = Intent(context, PostActivity::class.java)
+                            onClick = {  val intentPLats = Intent(context, ListarPostsActivity::class.java)
                                 context.startActivity(intentPLats) },
                             modifier = Modifier
                                 .padding(10.dp)
