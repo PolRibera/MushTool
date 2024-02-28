@@ -1,5 +1,6 @@
 package com.example.Projecte3MushTool
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -149,100 +150,102 @@ fun LemonadeApp(context: Context, auth: FirebaseAuth) {
             )
         },
         bottomBar = {
-            BottomAppBar(
-                // Usa el mismo color para la BottomAppBar
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF6B0C0C))
-                        .fillMaxSize(),
-                    horizontalArrangement = Arrangement.SpaceEvenly // Distribuye los elementos de manera uniforme en la fila
+            if (!uid.isNullOrEmpty()) {
+                BottomAppBar(
+                    // Usa el mismo color para la BottomAppBar
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFF6B0C0C))
+                            .fillMaxSize(),
+                        horizontalArrangement = Arrangement.SpaceEvenly // Distribuye los elementos de manera uniforme en la fila
                     ) {
-                        Button(
-                            onClick = {
-                                val intentBus = Intent(context, BusquedaActivity::class.java)
-                                context.startActivity(intentBus)
-                            },
-                            modifier = Modifier
-                                .background(Color(0xFF6B0C0C))
-                                .fillMaxHeight(),// Tamaño cuadrado del botón
-                            // Agrega espacio alrededor del botón
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
                         ) {
-                            Image(
-                                painter = painterResource(R.drawable.buscar_logo), // Cambiar con tu recurso
-                                contentDescription = "Descripción de la imagen",
-                                // Hace que la imagen llene todo el espacio disponible del botón
-                            )
-                        }
-                    }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
-                    ) {
-                        Button(
-                            onClick = {
-                                val intentMapa = Intent(context, MapaActivity::class.java)
-                                context.startActivity(intentMapa)
-                            },
-                            modifier = Modifier
-                                .background(Color(0xFF6B0C0C))
-                                .fillMaxHeight(),// Tamaño cuadrado del botón
-                            // Agrega espacio alrededor del botón
-                        ) {
-                            Image(
-                                painter = painterResource(R.drawable.mapa_logo), // Cambiar con tu recurso
-                                contentDescription = "Descripción de la imagen",
-                                // Hace que la imagen llene todo el espacio disponible del botón
-                            )
-                        }
-                    }
-
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
-                    ) {
-                        Button(
-                            onClick = {
-                                val intentLearn = Intent(context, LearnActivity::class.java)
-                                context.startActivity(intentLearn)
-                            },
-                            modifier = Modifier
-                                .background(Color(0xFF6B0C0C))
-                                .fillMaxHeight(),// Tamaño cuadrado del botón
-                            // Agrega espacio alrededor del botón
-                        ) {
-                            Image(
-                                painter = painterResource(R.drawable.laern_logo), // Cambiar con tu recurso
-                                contentDescription = "Descripción de la imagen",
-                                // Hace que la imagen llene todo el espacio disponible del botón
-                            )
-                        }
-                    }
-
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
-                    ) {
-                        Button(
-                            onClick = {
-                                val intentPLats = Intent(context, PlatsActivity::class.java)
-                                context.startActivity(intentPLats)
-                            },
-                            modifier = Modifier
-                                .background(Color(0xFF6B0C0C))
-                                .fillMaxHeight() // Tamaño cuadrado del botón // Agrega espacio alrededor del botón
-                        ) {
-                            Image(
-                                painter = painterResource(R.drawable.logo_plats), // Cambiar con tu recurso
-                                contentDescription = "Descripción de la imagen",
+                            Button(
+                                onClick = {
+                                    val intentBus = Intent(context, BusquedaActivity::class.java)
+                                    context.startActivity(intentBus)
+                                },
                                 modifier = Modifier
-                                    .fillMaxSize() // Hace que la imagen llene todo el espacio disponible del botón
-                            )
+                                    .background(Color(0xFF6B0C0C))
+                                    .fillMaxHeight(),// Tamaño cuadrado del botón
+                                // Agrega espacio alrededor del botón
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.buscar_logo), // Cambiar con tu recurso
+                                    contentDescription = "Descripción de la imagen",
+                                    // Hace que la imagen llene todo el espacio disponible del botón
+                                )
+                            }
+                        }
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
+                        ) {
+                            Button(
+                                onClick = {
+                                    val intentMapa = Intent(context, MapaActivity::class.java)
+                                    context.startActivity(intentMapa)
+                                },
+                                modifier = Modifier
+                                    .background(Color(0xFF6B0C0C))
+                                    .fillMaxHeight(),// Tamaño cuadrado del botón
+                                // Agrega espacio alrededor del botón
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.mapa_logo), // Cambiar con tu recurso
+                                    contentDescription = "Descripción de la imagen",
+                                    // Hace que la imagen llene todo el espacio disponible del botón
+                                )
+                            }
+                        }
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
+                        ) {
+                            Button(
+                                onClick = {
+                                    val intentLearn = Intent(context, LearnActivity::class.java)
+                                    context.startActivity(intentLearn)
+                                },
+                                modifier = Modifier
+                                    .background(Color(0xFF6B0C0C))
+                                    .fillMaxHeight(),// Tamaño cuadrado del botón
+                                // Agrega espacio alrededor del botón
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.laern_logo), // Cambiar con tu recurso
+                                    contentDescription = "Descripción de la imagen",
+                                    // Hace que la imagen llene todo el espacio disponible del botón
+                                )
+                            }
+                        }
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.weight(1f) // Asegura que esta columna ocupe el mismo espacio que las demás
+                        ) {
+                            Button(
+                                onClick = {
+                                    val intentPLats = Intent(context, PlatsActivity::class.java)
+                                    context.startActivity(intentPLats)
+                                },
+                                modifier = Modifier
+                                    .background(Color(0xFF6B0C0C))
+                                    .fillMaxHeight() // Tamaño cuadrado del botón // Agrega espacio alrededor del botón
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.logo_plats), // Cambiar con tu recurso
+                                    contentDescription = "Descripción de la imagen",
+                                    modifier = Modifier
+                                        .fillMaxSize() // Hace que la imagen llene todo el espacio disponible del botón
+                                )
+                            }
                         }
                     }
                 }
@@ -250,51 +253,56 @@ fun LemonadeApp(context: Context, auth: FirebaseAuth) {
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
+            if (uid.isNullOrEmpty()) {
+                Text("Please log in to continue", modifier = Modifier.align(Alignment.Center))
+            }
             // Aquí puedes colocar el contenido principal de tu aplicación
-
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly // Distribuye los elementos de manera uniforme en la fila
+            if (!uid.isNullOrEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Button(
-                            onClick = {
-                                val intentPLats = Intent(context, MensajesActivity::class.java)
-                                context.startActivity(intentPLats)
-                            },
-                            modifier = Modifier
-                                .padding(10.dp)
-                                .size(240.dp, 100.dp)
-                                .background(Color(0xFF6B0C0C)),// Tamaño cuadrado del botón
-                            // Agrega espacio alrededor del botón
-                        ) {
-                            Text("Mensajes") // Texto del botón
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly // Distribuye los elementos de manera uniforme en la fila
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Button(
+                                onClick = {
+                                    val intentPLats = Intent(context, MensajesActivity::class.java)
+                                    context.startActivity(intentPLats)
+                                },
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .size(240.dp, 100.dp)
+                                    .background(Color(0xFF6B0C0C)),// Tamaño cuadrado del botón
+                                // Agrega espacio alrededor del botón
+                            ) {
+                                Text("Mensajes") // Texto del botón
+                            }
                         }
                     }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly // Distribuye los elementos de manera uniforme en la fila
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Button(
-                            onClick = {
-                                val intentPLats = Intent(context, ListarPostsActivity::class.java)
-                                context.startActivity(intentPLats)
-                            },
-                            modifier = Modifier
-                                .padding(10.dp)
-                                .size(240.dp, 100.dp)
-                                .background(Color(0xFF6B0C0C)),// Tamaño cuadrado del botón
-                            // Agrega espacio alrededor del botón
-                        ) {
-                            Text("Posts") // Texto del botón
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly // Distribuye los elementos de manera uniforme en la fila
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Button(
+                                onClick = {
+                                    val intentPLats =
+                                        Intent(context, ListarPostsActivity::class.java)
+                                    context.startActivity(intentPLats)
+                                },
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .size(240.dp, 100.dp)
+                                    .background(Color(0xFF6B0C0C)),// Tamaño cuadrado del botón
+                                // Agrega espacio alrededor del botón
+                            ) {
+                                Text("Posts") // Texto del botón
+                            }
                         }
                     }
                 }

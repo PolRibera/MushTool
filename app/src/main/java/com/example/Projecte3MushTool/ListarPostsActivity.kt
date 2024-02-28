@@ -72,18 +72,14 @@ class ListarPostsActivity : ComponentActivity() {
                     val newPosts = mutableListOf<Post>()
 
                     for (postSnapshot in dataSnapshot.children) {
-                        val uid =
-                            postSnapshot.child("uid").getValue(String::class.java)
-                        val comentario =
-                            postSnapshot.child("comentario").getValue(String::class.java)
+                        val uid = postSnapshot.child("uid").getValue(String::class.java)
+                        val comentario = postSnapshot.child("comentario").getValue(String::class.java)
                         val imgPath = postSnapshot.child("imgPath").getValue(String::class.java)
-                        val sciNameSeta =
-                            postSnapshot.child("setaPost").getValue(String::class.java)
-                        val locationString =
-                            postSnapshot.child("location").getValue(String::class.java)
+                        val sciNameSeta = postSnapshot.child("setaPost").getValue(String::class.java)
+                        val locationString = postSnapshot.child("location").getValue(String::class.java)
 
-                        if (imgPath != null && comentario != null && sciNameSeta != null && locationString != null) {
-                            val post = Post(uid.toString(),imgPath, comentario, sciNameSeta, locationString)
+                        if (uid != null && uid == auth.currentUser?.uid && comentario != null && sciNameSeta != null && locationString != null && imgPath != null) {
+                            val post = Post(uid, imgPath, comentario, sciNameSeta, locationString)
                             newPosts.add(post)
                         }
                     }
