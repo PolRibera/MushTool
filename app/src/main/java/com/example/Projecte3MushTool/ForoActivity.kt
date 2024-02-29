@@ -4,52 +4,37 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
-import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class ForoActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
-    private lateinit var layoutPosts: LinearLayout // Declaración de la propiedad layoutPosts
-    private var creatorId: String = "" // Variable para almacenar el ID del creador
+    private lateinit var layoutPosts: LinearLayout
+    private lateinit var userId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_foro)
 
         auth = FirebaseAuth.getInstance()
-        database = FirebaseDatabase.getInstance().reference.child("posts")
+        database = FirebaseDatabase.getInstance().reference.child("ForoPost")
 
-        val editTextNewPost = findViewById<EditText>(R.id.editTextNewPost)
-        val buttonPost = findViewById<Button>(R.id.buttonPost)
-        layoutPosts = findViewById(R.id.layoutPosts) // Inicialización de layoutPosts
+        userId = auth.currentUser?.uid ?: ""
 
-        buttonPost.setOnClickListener {
-            val newPostText = editTextNewPost.text.toString().trim()
-            if (newPostText.isNotEmpty()) {
-                val userId = auth.currentUser?.uid
-                if (userId != null) {
-                    creatorId = userId // Almacenar el ID del creador
-                    val postId = database.push().key
-                    val post = ForoPost(postId, userId, newPostText)
-                    database.child(postId!!).setValue(post)
-                    editTextNewPost.text.clear()
-                } else {
-                    Toast.makeText(this@ForoActivity, "Debes iniciar sesión para publicar un post", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this@ForoActivity, LoginActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                }
-            } else {
-                Toast.makeText(this@ForoActivity, "Debes ingresar un texto para publicar un post", Toast.LENGTH_SHORT).show()
-            }
+        val buttonCrearPost = findViewById<Button>(R.id.buttonCrearPost)
+        layoutPosts = findViewById(R.id.layoutPosts)
+
+        buttonCrearPost.setOnClickListener {
+            startActivity(Intent(this, CrearPostActivity::class.java))
         }
 
+        // Cambios en ValueEventListener para mostrar todos los posts
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 layoutPosts.removeAllViews()
@@ -71,12 +56,29 @@ class ForoActivity : ComponentActivity() {
         val container = LinearLayout(this@ForoActivity)
         container.orientation = LinearLayout.VERTICAL
 
+        val textViewUserName = TextView(this@ForoActivity)
+        // Agregar nombre de usuario
+        textViewUserName.text = foroPost.userId
+
         val textViewPost = TextView(this@ForoActivity)
+        // Agregar el texto del post
         textViewPost.text = foroPost.text
 
-        if (auth.currentUser?.uid == creatorId) { // Verificar si el usuario actual es el creador del post
+        // Añadir borde al contenedor
+        container.background = ContextCompat.getDrawable(this@ForoActivity, R.drawable.post_border)
+
+        // Agregar OnClickListener al contenedor para abrir ViewPostActivity
+        container.setOnClickListener {
+            val intent = Intent(this@ForoActivity, ViewPostActivity::class.java)
+            intent.putExtra("postId", foroPost.id)
+            startActivity(intent)
+        }
+
+        // Añadir botones de editar y borrar solo si el usuario actual es el creador del post
+        if (auth.currentUser?.uid == foroPost.userId) {
             val editButton = Button(this@ForoActivity)
             editButton.text = "Editar"
+            // Agregar OnClickListener para editar
             editButton.setOnClickListener {
                 val intent = Intent(this@ForoActivity, EditForoPostActivity::class.java)
                 intent.putExtra("postId", foroPost.id)
@@ -85,6 +87,7 @@ class ForoActivity : ComponentActivity() {
 
             val deleteButton = Button(this@ForoActivity)
             deleteButton.text = "Borrar"
+            // Agregar OnClickListener para borrar
             deleteButton.setOnClickListener {
                 val postId = foroPost.id
                 if (postId != null) {
@@ -97,9 +100,9 @@ class ForoActivity : ComponentActivity() {
             container.addView(deleteButton)
         }
 
+        container.addView(textViewUserName)
         container.addView(textViewPost)
 
         layoutPosts.addView(container)
     }
 }
-

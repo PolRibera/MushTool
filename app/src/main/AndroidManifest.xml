@@ -56,6 +56,11 @@
             android:name=".LearnActivity"
             android:exported="false" />
 
+        <activity android:name=".ViewPostActivity"
+            android:exported="false"
+            />
+
+
         <activity
             android:name=".MapaActivity"
             android:exported="false" />
@@ -64,8 +69,19 @@
             android:name=".PlatsActivity"
             android:exported="false" />
 
+        <activity android:name=".CrearPostActivity"
+            android:exported="false"
+            />
+
+
         <activity
             android:name=".ConfigActivity"
+            android:exported="false" />
+
+        <activity android:name=".EditForoPostActivity"
+            android:exported="false" />
+
+        <activity android:name=".ResponderComentarioActivity"
             android:exported="false" />
 
         <activity

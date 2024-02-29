@@ -5,22 +5,16 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/editTextNewPost"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Nuevo Post"
-        android:inputType="text"
-        android:singleLine="true"
-        android:layout_marginBottom="16dp"/>
-
+    <!-- Nuevo botón para crear un nuevo post -->
     <Button
-        android:id="@+id/buttonPost"
+        android:id="@+id/buttonCrearPost"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Publicar"
+        android:text="Crear Post"
         android:layout_gravity="center"
-        android:textColor="@android:color/white"/>
+        android:textSize="14sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="16dp"/>
 
     <ScrollView
         android:id="@+id/scrollViewPosts"
@@ -36,5 +30,4 @@
             android:orientation="vertical"/>
 
     </ScrollView>
-
 </LinearLayout>
