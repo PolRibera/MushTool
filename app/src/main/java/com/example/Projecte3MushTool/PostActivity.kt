@@ -224,11 +224,12 @@ class PostActivity : ComponentActivity() {
             val locationString = "${location.latitude};${location.longitude}"
             val user = auth.currentUser
             val uid = user?.uid
+            val key = postReference.push().key
             // Crea el objeto Post con la imagen, el comentario, la ubicación y otros detalles necesarios
-            val post = Post(uid.toString(),imgPath, comentario, sciNameSeta, locationString)
+            val post = Post(key.toString(),uid.toString(),imgPath, comentario, sciNameSeta, locationString,"")
 
             // Guarda el post en la base de datos Firebase
-            postReference.push().setValue(post)
+            postReference.child(post.key).setValue(post)
                 .addOnSuccessListener {
                     Toast.makeText(context, "Post añadido correctamente", Toast.LENGTH_SHORT).show()
                 }

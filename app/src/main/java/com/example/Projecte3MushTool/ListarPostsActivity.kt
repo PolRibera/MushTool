@@ -72,14 +72,16 @@ class ListarPostsActivity : ComponentActivity() {
                     val newPosts = mutableListOf<Post>()
 
                     for (postSnapshot in dataSnapshot.children) {
+                        val key = postSnapshot.child("key").getValue(String::class.java)
                         val uid = postSnapshot.child("uid").getValue(String::class.java)
                         val comentario = postSnapshot.child("comentario").getValue(String::class.java)
                         val imgPath = postSnapshot.child("imgPath").getValue(String::class.java)
                         val sciNameSeta = postSnapshot.child("setaPost").getValue(String::class.java)
                         val locationString = postSnapshot.child("location").getValue(String::class.java)
+                        val userShare = postSnapshot.child("userShare").getValue(String::class.java)
 
-                        if (uid != null && uid == auth.currentUser?.uid && comentario != null && sciNameSeta != null && locationString != null && imgPath != null) {
-                            val post = Post(uid, imgPath, comentario, sciNameSeta, locationString)
+                        if (uid != null && uid == auth.currentUser?.uid && comentario != null && sciNameSeta != null && locationString != null && imgPath != null && userShare!=null && key!=null) {
+                            val post = Post(key,uid, imgPath, comentario, sciNameSeta, locationString, userShare)
                             newPosts.add(post)
                         }
                     }
@@ -147,23 +149,38 @@ class ListarPostsActivity : ComponentActivity() {
                     ) {
                         Text("Añadir Post")
                     }
+                    Text(text = "Mis Posts")
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color.White)
                             .padding(16.dp)
                     ) {
+
                         items(postsState) { post ->
+                            var authorUsername by remember { mutableStateOf("") }
+                            userReference.addValueEventListener(object : ValueEventListener {
+                                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                    val userBD = dataSnapshot.child(post.uid)
+                                    authorUsername = userBD.child("username").getValue(String::class.java).toString()
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    // Handle cancellation
+                                }
+                            })
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp)
                                     .clickable {
                                         selectedPost = post
-                                        showDialog = true
+                                        val intent = Intent(context, PostDetailActivity::class.java)
+                                        intent.putExtra("selectedPost", selectedPost)
+                                        context.startActivity(intent)
                                     }
                             ) {
-                                Text(username, color = Color(0xFF6B0C0C))
+                                Text(authorUsername)
                                 Image(
                                     painter = rememberImagePainter(post.imgPath),
                                     contentDescription = "Image of the post",
@@ -171,38 +188,8 @@ class ListarPostsActivity : ComponentActivity() {
                                         .fillMaxWidth()
                                         .height(200.dp)
                                 )
-                                Text(text = "Comentario: ${post.comentario}")
                             }
                         }
-                    }
-
-                    if (showDialog && selectedPost != null) {
-                        AlertDialog(
-                            onDismissRequest = {
-                                showDialog = false
-                                selectedPost = null
-                            },
-                            title = {
-                                Text("Detalles del Post")
-                            },
-                            text = {
-                                Column {
-                                    Text(text = "Comentario: ${selectedPost!!.comentario}")
-                                    Text(text = "Nombre Científico de la Seta: ${selectedPost!!.setaPost}")
-                                    Text(text = "Ubicación: ${selectedPost!!.location}")
-                                }
-                            },
-                            confirmButton = {
-                                Button(
-                                    colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),
-                                    onClick = {
-                                        showDialog = false
-                                    }
-                                ) {
-                                    Text("Cerrar")
-                                }
-                            }
-                        )
                     }
                 }
             }
