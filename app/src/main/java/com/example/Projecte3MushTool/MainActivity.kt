@@ -271,7 +271,7 @@ fun LemonadeApp(context: Context, auth: FirebaseAuth) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Button(
                                 onClick = {
-                                    val intentPLats = Intent(context, MensajesActivity::class.java)
+                                    val intentPLats = Intent(context, ForoActivity::class.java)
                                     context.startActivity(intentPLats)
                                 },
                                 modifier = Modifier
@@ -280,7 +280,7 @@ fun LemonadeApp(context: Context, auth: FirebaseAuth) {
                                     .background(Color(0xFF6B0C0C)),// Tamaño cuadrado del botón
                                 // Agrega espacio alrededor del botón
                             ) {
-                                Text("Mensajes") // Texto del botón
+                                Text("Foro") // Texto del botón
                             }
                         }
                     }

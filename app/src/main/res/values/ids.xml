@@ -2,4 +2,7 @@
 <resources>
     <item name="editTextEmail" type="id" />
     <item name="editTextPassword" type="id" />
+    <item name="editTextNewPost" type="id" />
+    <item name="buttonPost" type="id" />
+    <item name="layoutPosts" type="id" />
 </resources>
