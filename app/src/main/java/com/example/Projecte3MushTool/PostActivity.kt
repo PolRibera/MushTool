@@ -49,8 +49,7 @@ import com.example.lemonade.ui.theme.AppTheme
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationSettingsResponse
 import com.google.android.gms.tasks.Task
-
-
+import com.google.firebase.auth.FirebaseAuth
 
 
 class PostActivity : ComponentActivity() {
@@ -63,7 +62,8 @@ class PostActivity : ComponentActivity() {
     private var lastKnownLocation: Location? = null
     private var comentario by mutableStateOf("")
     var selectedSeta by mutableStateOf<Seta?>(null)
-
+    private lateinit var auth: FirebaseAuth
+    private lateinit var userReference: DatabaseReference
     companion object {
         private const val CAMERA_REQUEST_CODE = 1888
         private const val PERMISSION_REQUEST_CODE = 123
@@ -72,12 +72,27 @@ class PostActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        auth = FirebaseAuth.getInstance()
         postReference = FirebaseDatabase.getInstance().getReference("Post")
         boletReference = FirebaseDatabase.getInstance().getReference("Bolet")
         storageReference = FirebaseStorage.getInstance().reference
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        userReference = FirebaseDatabase.getInstance().getReference("Usuari")
+        val user = auth.currentUser
+        val uid = user?.uid
+        var username = ""
+        if (uid != null) {
+            userReference.addValueEventListener(object :  ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val userBD = dataSnapshot.child(uid)
+                    username = userBD.child("username").getValue(String::class.java).toString()
+                }
 
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle cancellation
+                }
+            })
+        }
         setContent {
             CrearPostApp(this)
         }
@@ -205,10 +220,12 @@ class PostActivity : ComponentActivity() {
     }
     private fun crearNuevoPost(imgPath: String, comentario: String, sciNameSeta: String, context: Context) {
         obtenerUbicacionActual(context) { location ->
-            val locationString = "${location.latitude};${location.longitude}"
 
+            val locationString = "${location.latitude};${location.longitude}"
+            val user = auth.currentUser
+            val uid = user?.uid
             // Crea el objeto Post con la imagen, el comentario, la ubicación y otros detalles necesarios
-            val post = Post(imgPath, comentario, sciNameSeta, locationString)
+            val post = Post(uid.toString(),imgPath, comentario, sciNameSeta, locationString)
 
             // Guarda el post en la base de datos Firebase
             postReference.push().setValue(post)
@@ -222,7 +239,13 @@ class PostActivity : ComponentActivity() {
 
     }
 
-
+    private fun startMainActivityWithUid(uid: String) {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra("uid", uid)
+        }
+        startActivity(intent)
+        finish()
+    }
 
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -286,8 +309,8 @@ class PostActivity : ComponentActivity() {
 
                             Button(
                                 onClick = {
-                                    val intent = Intent(context, MainActivity::class.java)
-                                    context.startActivity(intent) },
+                                    auth.uid?.let { startMainActivityWithUid(it) }
+                                },
                                 colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically)

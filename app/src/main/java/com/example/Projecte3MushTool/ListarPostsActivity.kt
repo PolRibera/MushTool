@@ -27,23 +27,40 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.firebase.database.*
 import coil.compose.rememberImagePainter
+import com.google.firebase.auth.FirebaseAuth
 
 class ListarPostsActivity : ComponentActivity() {
     private lateinit var postReference: DatabaseReference
-
+    private lateinit var userReference: DatabaseReference
+    private lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        auth = FirebaseAuth.getInstance()
         postReference = FirebaseDatabase.getInstance().getReference("Post")
+        userReference = FirebaseDatabase.getInstance().getReference("Usuari")
+        val user = auth.currentUser
+        val uid = user?.uid
+        var username = ""
+        if (uid != null) {
+            userReference.addValueEventListener(object :  ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val userBD = dataSnapshot.child(uid)
+                    username = userBD.child("username").getValue(String::class.java).toString()
+                }
 
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle cancellation
+                }
+            })
+        }
         setContent {
-            ListarPostsApp(this)
+            ListarPostsApp(this,username)
         }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun ListarPostsApp(context: Context) {
+    fun ListarPostsApp(context: Context, username: String) {
         var postsState by remember { mutableStateOf<List<Post>>(emptyList()) }
         var selectedPost by remember { mutableStateOf<Post?>(null) }
         var showDialog by remember { mutableStateOf(false) }
@@ -55,16 +72,14 @@ class ListarPostsActivity : ComponentActivity() {
                     val newPosts = mutableListOf<Post>()
 
                     for (postSnapshot in dataSnapshot.children) {
-                        val comentario =
-                            postSnapshot.child("comentario").getValue(String::class.java)
+                        val uid = postSnapshot.child("uid").getValue(String::class.java)
+                        val comentario = postSnapshot.child("comentario").getValue(String::class.java)
                         val imgPath = postSnapshot.child("imgPath").getValue(String::class.java)
-                        val sciNameSeta =
-                            postSnapshot.child("setaPost").getValue(String::class.java)
-                        val locationString =
-                            postSnapshot.child("location").getValue(String::class.java)
+                        val sciNameSeta = postSnapshot.child("setaPost").getValue(String::class.java)
+                        val locationString = postSnapshot.child("location").getValue(String::class.java)
 
-                        if (imgPath != null && comentario != null && sciNameSeta != null && locationString != null) {
-                            val post = Post(imgPath, comentario, sciNameSeta, locationString)
+                        if (uid != null && uid == auth.currentUser?.uid && comentario != null && sciNameSeta != null && locationString != null && imgPath != null) {
+                            val post = Post(uid, imgPath, comentario, sciNameSeta, locationString)
                             newPosts.add(post)
                         }
                     }
@@ -148,6 +163,7 @@ class ListarPostsActivity : ComponentActivity() {
                                         showDialog = true
                                     }
                             ) {
+                                Text(username, color = Color(0xFF6B0C0C))
                                 Image(
                                     painter = rememberImagePainter(post.imgPath),
                                     contentDescription = "Image of the post",
@@ -196,6 +212,6 @@ class ListarPostsActivity : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     fun DefaultPreview() {
-        ListarPostsApp(this)
+        ListarPostsApp(this,"username")
     }
 }

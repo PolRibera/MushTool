@@ -141,6 +141,8 @@ class MapaActivity : ComponentActivity() {
                 mapView.overlays.add(mMyLocationOverlay)
                 for (postSnapshot in dataSnapshot.children) {
                     val locationString = postSnapshot.child("location").getValue(String::class.java)
+                    val comment = postSnapshot.child("comentario").getValue(String::class.java)
+                    val mushroomType = postSnapshot.child("setaPost").getValue(String::class.java)
 
                     if (locationString != null) {
                         val (latitude, longitude) = locationString.split(";")
@@ -151,6 +153,8 @@ class MapaActivity : ComponentActivity() {
                         val location = GeoPoint(lat, lon)
                         val marker = Marker(mapView)
                         marker.position = location
+                        marker.title = mushroomType // Asignar el comentario al título del marcador
+                        marker.snippet = comment // Asignar el tipo de seta al snippet del marcador
                         mapView.overlays.add(marker)
 
                         points.add(location)
@@ -175,6 +179,7 @@ class MapaActivity : ComponentActivity() {
             }
         })
     }
+
 
 
     fun calculateZoomLevel(distancePerPixel: Double, screenWidth: Int): Double {

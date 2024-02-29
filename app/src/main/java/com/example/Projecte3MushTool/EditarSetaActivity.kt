@@ -53,12 +53,19 @@ class EditarSetaActivity : ComponentActivity() {
         val warnLevel = intent.getIntExtra("warn_level", 0)
         val difficulty = intent.getIntExtra("difficulty", 0)
         setContent {
-                EditarSetaApp(this, imgPath, name, sciName, warnLevel, difficulty)
+            EditarSetaApp(this, imgPath, name, sciName, warnLevel, difficulty)
         }
     }
 
     @Composable
-    fun EditarSetaApp(context: Context, imgPath: String?, name: String?, sciName: String?, warnLevel: Int?, difficulty: Int?) {
+    fun EditarSetaApp(
+        context: Context,
+        imgPath: String?,
+        name: String?,
+        sciName: String?,
+        warnLevel: Int?,
+        difficulty: Int?
+    ) {
         val imgPathState = remember { mutableStateOf(imgPath ?: "") }
         val nameState = remember { mutableStateOf(name ?: "") }
         val sciNameState = remember { mutableStateOf(sciName ?: "") }
@@ -90,7 +97,8 @@ class EditarSetaActivity : ComponentActivity() {
                             Button(
                                 onClick = {
                                     val intent = Intent(context, MainActivity::class.java)
-                                    context.startActivity(intent) },
+                                    context.startActivity(intent)
+                                },
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically)
                                     .background(Color(0xFF6B0C0C))
@@ -173,12 +181,5 @@ class EditarSetaActivity : ComponentActivity() {
 
         }
     }
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    AppTheme {
-        LemonadeApp(LocalContext.current)
-        }
-    }
 }
+
