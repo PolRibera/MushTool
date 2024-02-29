@@ -175,11 +175,16 @@ class PostDetailActivity  : AppCompatActivity(){
                     Text(text = "Tipo de Seta Encontrada: ${selectedPost.setaPost}")
                     Text(text = "Localizacion: ${selectedPost.location}")
 
-                    Button(onClick = {
-                        checkboxStates = allUsers.associate { user -> user.uid to (selectedPost.userShare?.split(";")?.contains(user.uid) ?: false) }
-                        showDialog = true
-                    }) {
-                        Text("Share Post")
+                    if (auth.currentUser?.uid == selectedPost.uid) {
+                        Button(
+                            colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),
+                            onClick = {
+                                checkboxStates = allUsers.associate { user -> user.uid to (selectedPost.userShare?.split(";")?.contains(user.uid) ?: false) }
+                                showDialog = true
+                            }
+                        ) {
+                            Text("Share Post")
+                        }
                     }
 
                 }

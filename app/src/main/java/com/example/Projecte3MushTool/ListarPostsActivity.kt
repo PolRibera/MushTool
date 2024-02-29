@@ -15,6 +15,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -64,13 +66,16 @@ class ListarPostsActivity : ComponentActivity() {
         var postsState by remember { mutableStateOf<List<Post>>(emptyList()) }
         var selectedPost by remember { mutableStateOf<Post?>(null) }
         var showDialog by remember { mutableStateOf(false) }
+        val currentUserUid = auth.currentUser?.uid
 
+        var sharedPostsState by remember { mutableStateOf<List<Post>>(emptyList()) }
         LaunchedEffect(true) {
             val posts = mutableListOf<Post>()
+            val sharedPosts = mutableListOf<Post>()
             postReference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val newPosts = mutableListOf<Post>()
-
+                    val newSharedPosts = mutableListOf<Post>()
                     for (postSnapshot in dataSnapshot.children) {
                         val key = postSnapshot.child("key").getValue(String::class.java)
                         val uid = postSnapshot.child("uid").getValue(String::class.java)
@@ -84,8 +89,17 @@ class ListarPostsActivity : ComponentActivity() {
                             val post = Post(key,uid, imgPath, comentario, sciNameSeta, locationString, userShare)
                             newPosts.add(post)
                         }
+                            if (userShare != null && comentario != null && sciNameSeta != null && locationString != null && imgPath != null && uid!=null && key!=null) {
+                                if (userShare.split(";").contains(currentUserUid)) {
+                                    val post = Post(key,uid, imgPath, comentario, sciNameSeta, locationString, userShare)
+                                    newSharedPosts.add(post)
+                                }
+                            }
+
+
                     }
                     postsState = newPosts
+                    sharedPostsState = newSharedPosts
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -93,6 +107,8 @@ class ListarPostsActivity : ComponentActivity() {
                 }
             })
         }
+
+        var selectedOption by remember { mutableStateOf("Mis Posts") }
 
         Scaffold(
             topBar = {
@@ -149,45 +165,115 @@ class ListarPostsActivity : ComponentActivity() {
                     ) {
                         Text("Añadir Post")
                     }
-                    Text(text = "Mis Posts")
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White)
-                            .padding(16.dp)
-                    ) {
 
-                        items(postsState) { post ->
-                            var authorUsername by remember { mutableStateOf("") }
-                            userReference.addValueEventListener(object : ValueEventListener {
-                                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                                    val userBD = dataSnapshot.child(post.uid)
-                                    authorUsername = userBD.child("username").getValue(String::class.java).toString()
-                                }
+                    Row {
+                        RadioButton(
+                            selected = selectedOption == "Mis Posts",
+                            onClick = { selectedOption = "Mis Posts" },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = Color(0xFF6B0C0C),
+                                unselectedColor = Color.DarkGray
+                            )
+                        )
+                        Text("Mis Posts")
 
-                                override fun onCancelled(error: DatabaseError) {
-                                    // Handle cancellation
-                                }
-                            })
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable {
-                                        selectedPost = post
-                                        val intent = Intent(context, PostDetailActivity::class.java)
-                                        intent.putExtra("selectedPost", selectedPost)
-                                        context.startActivity(intent)
+                        RadioButton(
+                            selected = selectedOption == "Post Compartidos",
+                            onClick = { selectedOption = "Post Compartidos" },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = Color(0xFF6B0C0C),
+                                unselectedColor = Color.DarkGray
+                            )
+                        )
+                        Text("Post Compartidos")
+                    }
+
+                    if (selectedOption == "Mis Posts") {
+                        Text(text = "Mis Posts")
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White)
+                                .padding(16.dp)
+                        ) {
+                            items(postsState) { post ->
+                                var authorUsername by remember { mutableStateOf("") }
+                                userReference.addValueEventListener(object : ValueEventListener {
+                                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                        val userBD = dataSnapshot.child(post.uid)
+                                        authorUsername =
+                                            userBD.child("username").getValue(String::class.java)
+                                                .toString()
                                     }
-                            ) {
-                                Text(authorUsername)
-                                Image(
-                                    painter = rememberImagePainter(post.imgPath),
-                                    contentDescription = "Image of the post",
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                        // Handle cancellation
+                                    }
+                                })
+                                Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(200.dp)
-                                )
+                                        .padding(vertical = 8.dp)
+                                        .clickable {
+                                            selectedPost = post
+                                            val intent = Intent(context, PostDetailActivity::class.java)
+                                            intent.putExtra("selectedPost", selectedPost)
+                                            context.startActivity(intent)
+                                        }
+                                ) {
+                                    Text(authorUsername)
+                                    Image(
+                                        painter = rememberImagePainter(post.imgPath),
+                                        contentDescription = "Image of the post",
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(200.dp)
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        Text(text = "Shared Posts")
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White)
+                                .padding(16.dp)
+                        ) {
+                            items(sharedPostsState) { post ->
+                                var authorUsername by remember { mutableStateOf("") }
+                                userReference.addValueEventListener(object : ValueEventListener {
+                                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                        val userBD = dataSnapshot.child(post.uid)
+                                        authorUsername =
+                                            userBD.child("username").getValue(String::class.java)
+                                                .toString()
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                        // Handle cancellation
+                                    }
+                                })
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                        .clickable {
+                                            selectedPost = post
+                                            val intent = Intent(context, PostDetailActivity::class.java)
+                                            intent.putExtra("selectedPost", selectedPost)
+                                            context.startActivity(intent)
+                                        }
+                                ) {
+                                    Text(authorUsername)
+                                    Image(
+                                        painter = rememberImagePainter(post.imgPath),
+                                        contentDescription = "Image of the post",
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(200.dp)
+                                    )
+                                }
                             }
                         }
                     }
