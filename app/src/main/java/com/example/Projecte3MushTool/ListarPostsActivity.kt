@@ -66,14 +66,6 @@ class ListarPostsActivity : ComponentActivity() {
         var postsState by remember { mutableStateOf<List<Post>>(emptyList()) }
         var selectedPost by remember { mutableStateOf<Post?>(null) }
         var showDialog by remember { mutableStateOf(false) }
-
-        LaunchedEffect(true) {
-            val posts = mutableListOf<Post>()
-            postReference.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val newPosts = mutableListOf<Post>()
-
-                    for (postSnapshot in dataSnapshot.children) {
         val currentUserUid = auth.currentUser?.uid
 
         var sharedPostsState by remember { mutableStateOf<List<Post>>(emptyList()) }
@@ -91,25 +83,18 @@ class ListarPostsActivity : ComponentActivity() {
                         val imgPath = postSnapshot.child("imgPath").getValue(String::class.java)
                         val sciNameSeta = postSnapshot.child("setaPost").getValue(String::class.java)
                         val locationString = postSnapshot.child("location").getValue(String::class.java)
-
-                        if (uid != null && uid == auth.currentUser?.uid && comentario != null && sciNameSeta != null && locationString != null && imgPath != null) {
-                            val post = Post(uid, imgPath, comentario, sciNameSeta, locationString)
-                            newPosts.add(post)
-                        }
-                    }
-                    postsState = newPosts
                         val userShare = postSnapshot.child("userShare").getValue(String::class.java)
 
                         if (uid != null && uid == auth.currentUser?.uid && comentario != null && sciNameSeta != null && locationString != null && imgPath != null && userShare!=null && key!=null) {
                             val post = Post(key,uid, imgPath, comentario, sciNameSeta, locationString, userShare)
                             newPosts.add(post)
                         }
-                            if (userShare != null && comentario != null && sciNameSeta != null && locationString != null && imgPath != null && uid!=null && key!=null) {
-                                if (userShare.split(";").contains(currentUserUid)) {
-                                    val post = Post(key,uid, imgPath, comentario, sciNameSeta, locationString, userShare)
-                                    newSharedPosts.add(post)
-                                }
+                        if (userShare != null && comentario != null && sciNameSeta != null && locationString != null && imgPath != null && uid!=null && key!=null) {
+                            if (userShare.split(";").contains(currentUserUid)) {
+                                val post = Post(key,uid, imgPath, comentario, sciNameSeta, locationString, userShare)
+                                newSharedPosts.add(post)
                             }
+                        }
 
 
                     }
@@ -180,62 +165,6 @@ class ListarPostsActivity : ComponentActivity() {
                     ) {
                         Text("Añadir Post")
                     }
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White)
-                            .padding(16.dp)
-                    ) {
-                        items(postsState) { post ->
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable {
-                                        selectedPost = post
-                                        showDialog = true
-                                    }
-                            ) {
-                                Text(username, color = Color(0xFF6B0C0C))
-                                Image(
-                                    painter = rememberImagePainter(post.imgPath),
-                                    contentDescription = "Image of the post",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(200.dp)
-                                )
-                                Text(text = "Comentario: ${post.comentario}")
-                            }
-                        }
-                    }
-
-                    if (showDialog && selectedPost != null) {
-                        AlertDialog(
-                            onDismissRequest = {
-                                showDialog = false
-                                selectedPost = null
-                            },
-                            title = {
-                                Text("Detalles del Post")
-                            },
-                            text = {
-                                Column {
-                                    Text(text = "Comentario: ${selectedPost!!.comentario}")
-                                    Text(text = "Nombre Científico de la Seta: ${selectedPost!!.setaPost}")
-                                    Text(text = "Ubicación: ${selectedPost!!.location}")
-                                }
-                            },
-                            confirmButton = {
-                                Button(
-                                    colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),
-                                    onClick = {
-                                        showDialog = false
-                                    }
-                                ) {
-                                    Text("Cerrar")
-                                }
-                            }
-                        )
 
                     Row {
                         RadioButton(

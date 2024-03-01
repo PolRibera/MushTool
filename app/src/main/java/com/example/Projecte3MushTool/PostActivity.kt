@@ -224,11 +224,6 @@ class PostActivity : ComponentActivity() {
             val locationString = "${location.latitude};${location.longitude}"
             val user = auth.currentUser
             val uid = user?.uid
-            // Crea el objeto Post con la imagen, el comentario, la ubicación y otros detalles necesarios
-            val post = Post(uid.toString(),imgPath, comentario, sciNameSeta, locationString)
-
-            // Guarda el post en la base de datos Firebase
-            postReference.push().setValue(post)
             val key = postReference.push().key
             // Crea el objeto Post con la imagen, el comentario, la ubicación y otros detalles necesarios
             val post = Post(key.toString(),uid.toString(),imgPath, comentario, sciNameSeta, locationString,"")

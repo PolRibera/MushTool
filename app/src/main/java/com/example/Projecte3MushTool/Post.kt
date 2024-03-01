@@ -2,6 +2,7 @@ package com.example.Projecte3MushTool
 
 import java.io.Serializable
 
+
 data class Post(
     var key: String,
     var uid: String,
@@ -9,9 +10,9 @@ data class Post(
     var comentario: String,
     var setaPost: String,
     var location: String,
-)
     var userShare : String
 ): Serializable
 {
 
 }
+

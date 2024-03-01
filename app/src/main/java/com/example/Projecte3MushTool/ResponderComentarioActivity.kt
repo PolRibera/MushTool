@@ -31,7 +31,7 @@ class ResponderComentarioActivity : AppCompatActivity() {
             val respuesta = editTextRespuesta.text.toString().trim()
             if (respuesta.isNotEmpty()) {
                 responderComentario(respuesta)
-                finish() // Finaliza la actividad después de enviar la respuesta
+                finish()
             }
         }
     }
