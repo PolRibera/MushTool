@@ -41,6 +41,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".PostDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".RegisterActivity"
             android:exported="false" />
 
