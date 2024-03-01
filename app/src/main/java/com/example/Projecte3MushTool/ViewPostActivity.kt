@@ -62,7 +62,7 @@ class ViewPostActivity : AppCompatActivity() {
     }
 
     private fun loadComments(postId: String) {
-        val commentsRef = database.child("posts").child(postId).child("comments")
+        val commentsRef = database.child("ForoPost").child(postId).child("comments")
         commentsRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 commentsLayout.removeAllViews() // Limpiar el diseño de comentarios antes de agregar nuevos comentarios
@@ -81,19 +81,28 @@ class ViewPostActivity : AppCompatActivity() {
                             // Si el comentario fue realizado por el usuario actual, añadir un prefijo para distinguirlo
                             commentTextView.text = "Tú: $commentText"
                         } else {
-                            commentTextView.text = "$userId: $commentText"
+                            commentTextView.text = "$userId:$commentText"
                         }
 
                         // Mostrar las respuestas al comentario
                         val respuestasRef = commentSnapshot.child("respuestas")
                         for (respuestaSnapshot in respuestasRef.children) {
-                            val respuesta = respuestaSnapshot.getValue(String::class.java)
-                            if (!respuesta.isNullOrEmpty()) {
+                            // Acceder a cada campo de la respuesta individualmente
+                            val userId = respuestaSnapshot.child("userId").getValue(String::class.java)
+                            val respuestaText = respuestaSnapshot.child("text").getValue(String::class.java)
+
+                            // Verificar si los campos son no nulos o vacíos antes de mostrar la respuesta
+                            if (!userId.isNullOrEmpty() && !respuestaText.isNullOrEmpty()) {
+                                // Construir una cadena que represente la respuesta
+                                val respuestaString = "$userId:$respuestaText"
+
+                                // Crear un TextView para mostrar la respuesta
                                 val respuestaTextView = TextView(this@ViewPostActivity)
-                                respuestaTextView.text = "Respuesta: $respuesta"
+                                respuestaTextView.text = respuestaString
                                 commentContainer.addView(respuestaTextView)
                             }
                         }
+
 
                         val replyButton = Button(this@ViewPostActivity)
                         replyButton.text = "Responder"
@@ -124,10 +133,17 @@ class ViewPostActivity : AppCompatActivity() {
     private fun addComment(commentText: String) {
         val userId = auth.currentUser?.uid
         if (userId != null) {
-            val commentId = database.child("posts").child(postId).child("comments").push().key
+            val commentId = database.child("ForoPost").child(postId).child("comments").push().key
             val comment = Comment(commentId, userId, commentText)
-            database.child("posts").child(postId).child("comments").child(commentId!!).setValue(comment)
-
+database.child("ForoPost").child(postId).child("comments").child(commentId!!).setValue(comment)
+                .addOnSuccessListener {
+                    // El comentario se guardó exitosamente
+                    Log.d("ViewPostActivity", "Comentario guardado en Firebase")
+                }
+                .addOnFailureListener { e ->
+                    // Error al guardar el comentario
+                    Log.e("ViewPostActivity", "Error al guardar el comentario: ${e.message}")
+                }
             // Actualizar la vista para mostrar el nuevo comentario
             val commentTextView = TextView(this@ViewPostActivity)
             commentTextView.text = "$userId: $commentText"

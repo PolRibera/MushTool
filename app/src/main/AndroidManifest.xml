@@ -48,6 +48,10 @@
             android:name=".RegisterActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ScoreBoardActivity"
+            android:exported="false"
+        />
 
         <activity
             android:name=".ListarPostsActivity"
