@@ -136,7 +136,8 @@ fun LemonadeApp(context: Context, auth: FirebaseAuth) {
                                 },
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically)
-                            ) {
+                            )
+                            {
                                 Image(
                                     painter = painterResource(R.drawable.user_logo),
                                     contentDescription = "Descripción de la imagen",

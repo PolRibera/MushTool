@@ -1,16 +1,16 @@
 package com.example.Projecte3MushTool
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.example.lemonade.ui.theme.AppTheme
 import com.google.firebase.database.*
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -35,7 +34,9 @@ class LearnActivity : ComponentActivity() {
     private lateinit var Boletreference: DatabaseReference
     private var setasGroupedByDifficulty: Map<Int, List<Seta>> = emptyMap()
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         Boletreference = FirebaseDatabase.getInstance().getReference("Bolet")
 
@@ -46,6 +47,7 @@ class LearnActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("CoroutineCreationDuringComposition")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun TestGameApp(context: Context) {
@@ -53,8 +55,22 @@ class LearnActivity : ComponentActivity() {
         var currentQuestionIndex by remember { mutableStateOf(0) }
         var score by remember { mutableStateOf(0) }
         var desiredDifficulty by remember { mutableStateOf(1) }
-        var countdown by remember { mutableStateOf(10) }
+        var tiempoRestante by remember { mutableStateOf(5000L) } // Tiempo inicial en milisegundos (5 segundos)
+        var showTimer by remember { mutableStateOf("Tiempo restante: ${tiempoRestante / 1000} s") }
 
+        val countDownTimer = object: CountDownTimer(10000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                tiempoRestante = millisUntilFinished
+                showTimer = "Tiempo restante: ${tiempoRestante / 1000} s"
+            }
+
+            override fun onFinish() {
+                // The counter reached zero, treat as a failed response
+                val intent = Intent(context, ScoreBoardActivity::class.java)
+                intent.putExtra("score", score)
+                context.startActivity(intent)
+            }
+        }
         LaunchedEffect(true) {
             Boletreference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -62,12 +78,14 @@ class LearnActivity : ComponentActivity() {
                     val setasDifficulty2 = mutableListOf<Seta>()
                     val setasDifficulty3 = mutableListOf<Seta>()
 
+
                     for (setaSnapshot in dataSnapshot.children) {
                         val imageUrl = setaSnapshot.child("imageUrl").getValue(String::class.java)
                         val name = setaSnapshot.child("name").getValue(String::class.java)
                         val sci_name = setaSnapshot.child("sci_name").getValue(String::class.java)
                         val warn_level = setaSnapshot.child("warn_level").getValue(Int::class.java)
                         val difficulty = setaSnapshot.child("difficulty").getValue(Int::class.java)
+
 
                         if (imageUrl != null && name != null && sci_name != null && warn_level != null && difficulty != null) {
                             val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty)
@@ -91,9 +109,12 @@ class LearnActivity : ComponentActivity() {
                         3 to setasDifficulty3
                     )
 
+
+
                     // Actualiza la lista de setas con las setas de la dificultad deseada
                     setas = setasGroupedByDifficulty[desiredDifficulty] ?: emptyList()
                 }
+
 
                 override fun onCancelled(databaseError: DatabaseError) {
                     // Maneja posibles errores.
@@ -144,24 +165,11 @@ class LearnActivity : ComponentActivity() {
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    // Nuevo bloque para el contador fuera del cuestionario
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Contador: $countdown")
 
-                        // disminuye el contador cada segundo
-                        LaunchedEffect(key1 = countdown) {
-                            while (countdown > 0) {
-                                delay(1000L)
-                            }
-                        }
-                    }
+                    if (setas.isEmpty()) {
+                        Text("Cargando cuestionario...")
 
-                    if (currentQuestionIndex < setas.size) {
+                    } else if (currentQuestionIndex < setas.size) {
                         val seta = setas[currentQuestionIndex]
                         val sameDifficultySetas = setas.filter { it.difficulty == seta.difficulty && it.name != seta.name }
                         val options = (sameDifficultySetas + seta).shuffled()
@@ -191,17 +199,16 @@ class LearnActivity : ComponentActivity() {
                                         }
                                     }
                                 } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Incorrecto, tu puntuación es: $score",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    currentQuestionIndex = setas.size
+                                    val intent = Intent(context, ScoreBoardActivity::class.java)
+                                    intent.putExtra("score", score)
+                                    context.startActivity(intent)
                                 }
                             }
                         )
                     } else {
-                        Text("¡El cuestionario ha terminado! Tu puntuación es: $score")
+                        val intent = Intent(context, ScoreBoardActivity::class.java)
+                        intent.putExtra("score", score)
+                        context.startActivity(intent)
                     }
                 }
             }
@@ -247,4 +254,3 @@ class LearnActivity : ComponentActivity() {
         }
     }
 }
-
