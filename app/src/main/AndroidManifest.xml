@@ -51,8 +51,11 @@
         <activity
             android:name=".ScoreBoardActivity"
             android:exported="false"
-        />
+            />
 
+
+        <activity android:name=".RankingActivity"
+            android:exported="false"/>
         <activity
             android:name=".ListarPostsActivity"
             android:exported="false" />
