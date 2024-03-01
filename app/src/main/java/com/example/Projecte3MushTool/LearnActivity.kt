@@ -146,7 +146,11 @@ class LearnActivity : ComponentActivity() {
 
                             Button(
                                 onClick = {
-                                    auth.uid?.let { startMainActivityWithUid(it) }
+                                    auth.uid?.let {
+                                        FirebaseAuth.getInstance().signOut()
+                                        val intent = Intent(context, MainActivity::class.java)
+                                        context.startActivity(intent)
+                                    }
                                 },
                                 colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),
                                 modifier = Modifier
