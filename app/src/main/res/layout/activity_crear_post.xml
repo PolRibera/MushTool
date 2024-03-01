@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".CrearPostActivity">
+
+    <TextView
+        android:id="@+id/textViewTitulo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Crear un nuevo post"
+        android:textSize="24sp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:textStyle="bold"/>
+
+    <EditText
+        android:id="@+id/editTextNuevoPost"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Escribe tu nuevo post aquí..."
+        android:inputType="textMultiLine"
+        android:minLines="5"
+        android:gravity="start|top"
+        android:layout_below="@id/textViewTitulo"
+        android:layout_marginTop="16dp"/>
+
+    <Button
+        android:id="@+id/buttonPublicar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Publicar"
+        android:layout_below="@id/editTextNuevoPost"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"/>
+
+</RelativeLayout>

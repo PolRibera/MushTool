@@ -2,4 +2,10 @@
 <resources>
     <item name="editTextEmail" type="id" />
     <item name="editTextPassword" type="id" />
+    <item name="editTextNewPost" type="id" />
+    <item name="buttonPost" type="id" />
+    <item name="layoutPosts" type="id" />
+    <item name="commentsLayout" type="id" />
+    <item name="buttonPublicar" type="id" />
+    <item name="buttonGuardar" type="id" />
 </resources>

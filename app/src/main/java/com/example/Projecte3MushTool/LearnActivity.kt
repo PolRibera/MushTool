@@ -29,6 +29,7 @@ import coil.compose.rememberImagePainter
 import com.example.lemonade.ui.theme.AppTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class LearnActivity : ComponentActivity() {
@@ -36,6 +37,7 @@ class LearnActivity : ComponentActivity() {
     private var setasGroupedByDifficulty: Map<Int, List<Seta>> = emptyMap()
     private lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         Boletreference = FirebaseDatabase.getInstance().getReference("Bolet")
 
@@ -56,8 +58,6 @@ class LearnActivity : ComponentActivity() {
         var desiredDifficulty by remember { mutableStateOf(1) }
         var tiempoRestante by remember { mutableStateOf(5000L) } // Tiempo inicial en milisegundos (5 segundos)
         var showTimer by remember { mutableStateOf("Tiempo restante: ${tiempoRestante / 1000} s") }
-        var options by remember { mutableStateOf<List<String>>(emptyList()) }
-        var correctOption by remember { mutableStateOf("") }
 
         val countDownTimer = object: CountDownTimer(10000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -72,15 +72,6 @@ class LearnActivity : ComponentActivity() {
                 context.startActivity(intent)
             }
         }
-        fun startMainActivityWithUid(uid: String) {
-            val intent = Intent(this, MainActivity::class.java).apply {
-                putExtra("uid", uid)
-            }
-            startActivity(intent)
-            finish()
-        }
-
-
         LaunchedEffect(true) {
             Boletreference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -95,6 +86,7 @@ class LearnActivity : ComponentActivity() {
                         val warn_level = setaSnapshot.child("warn_level").getValue(Int::class.java)
                         val difficulty = setaSnapshot.child("difficulty").getValue(Int::class.java)
 
+
                         if (imageUrl != null && name != null && sci_name != null && warn_level != null && difficulty != null) {
                             val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty)
                             when (difficulty) {
@@ -105,25 +97,24 @@ class LearnActivity : ComponentActivity() {
                         }
                     }
 
-                    // Shuffle the setas inside each difficulty group
+                    // Mezcla las setas dentro de cada grupo de dificultad
                     setasDifficulty1.shuffle()
                     setasDifficulty2.shuffle()
                     setasDifficulty3.shuffle()
 
-                    // Assign the shuffled and grouped setas lists to the state variable
+                    // Asigna las listas de setas agrupadas y mezcladas a la variable de estado
                     setasGroupedByDifficulty = mapOf(
                         1 to setasDifficulty1,
                         2 to setasDifficulty2,
                         3 to setasDifficulty3
                     )
 
-                    // Update the setas list with the setas of the desired difficulty
-                    setas = setasGroupedByDifficulty[desiredDifficulty] ?: emptyList()
 
-                    // Shuffle options only when a new question is presented
-                    options = setas.map { it.name }.shuffled()
-                    correctOption = setas[currentQuestionIndex].name
+
+                    // Actualiza la lista de setas con las setas de la dificultad deseada
+                    setas = setasGroupedByDifficulty[desiredDifficulty] ?: emptyList()
                 }
+
 
                 override fun onCancelled(databaseError: DatabaseError) {
                     // Handle possible errors.
@@ -131,13 +122,6 @@ class LearnActivity : ComponentActivity() {
             })
         }
 
-        DisposableEffect(Unit) {
-            countDownTimer.start()
-
-            onDispose {
-                countDownTimer.cancel()
-            }
-        }
 
         Scaffold(
             topBar = {
@@ -187,12 +171,14 @@ class LearnActivity : ComponentActivity() {
                         Text("Cargando cuestionario...")
 
                     } else if (currentQuestionIndex < setas.size) {
-                        Text(showTimer)
                         val seta = setas[currentQuestionIndex]
+                        val sameDifficultySetas = setas.filter { it.difficulty == seta.difficulty && it.name != seta.name }
+                        val options = (sameDifficultySetas + seta).shuffled()
+                        val correctOption = seta.name
 
                         Question(
                             seta = seta,
-                            options = options,
+                            options = options.map { it.name },
                             correctOption = correctOption,
                             onOptionSelected = { selectedOption ->
                                 if (selectedOption == correctOption) {

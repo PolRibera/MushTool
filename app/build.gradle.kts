@@ -99,6 +99,7 @@
         implementation("com.google.android.gms:play-services-location:21.1.0")
         implementation("androidx.preference:preference-ktx:1.2.1")
         implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
+        implementation("com.google.firebase:firebase-firestore-ktx:24.10.3")
         debugImplementation("androidx.compose.ui:ui-test-manifest")
         debugImplementation("androidx.compose.ui:ui-tooling")
         implementation("com.google.firebase:firebase-database-ktx")
