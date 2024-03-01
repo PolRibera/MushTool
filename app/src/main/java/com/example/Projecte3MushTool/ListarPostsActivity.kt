@@ -89,12 +89,12 @@ class ListarPostsActivity : ComponentActivity() {
                             val post = Post(key,uid, imgPath, comentario, sciNameSeta, locationString, userShare)
                             newPosts.add(post)
                         }
-                        if (userShare != null && comentario != null && sciNameSeta != null && locationString != null && imgPath != null && uid!=null && key!=null) {
-                            if (userShare.split(";").contains(currentUserUid)) {
-                                val post = Post(key,uid, imgPath, comentario, sciNameSeta, locationString, userShare)
-                                newSharedPosts.add(post)
+                            if (userShare != null && comentario != null && sciNameSeta != null && locationString != null && imgPath != null && uid!=null && key!=null) {
+                                if (userShare.split(";").contains(currentUserUid)) {
+                                    val post = Post(key,uid, imgPath, comentario, sciNameSeta, locationString, userShare)
+                                    newSharedPosts.add(post)
+                                }
                             }
-                        }
 
 
                     }
