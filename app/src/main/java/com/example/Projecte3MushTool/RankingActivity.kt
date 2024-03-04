@@ -3,15 +3,19 @@ package com.example.Projecte3MushTool
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.lemonade.ui.theme.AppTheme
 import com.google.firebase.auth.FirebaseAuth
@@ -19,58 +23,27 @@ import com.google.firebase.database.*
 
 class RankingActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
-    private lateinit var userReference: DatabaseReference
-    private var username by mutableStateOf("")
+    private lateinit var scoresReference: DatabaseReference
     private var scores by mutableStateOf<List<ScoreQuiz>>(emptyList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
-        userReference = FirebaseDatabase.getInstance().getReference("Usuari")
+        scoresReference = FirebaseDatabase.getInstance().getReference("scores")
 
         setContent {
             AppTheme {
-                RankingApp(this, auth)
+                RankingApp(this)
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        val uid = auth.uid
-
-        if (uid != null) {
-            updateUsername(uid)
-            loadScores()
-        }
-    }
-
-    private fun restartActivity() {
-        val intent = intent
-        finish()
-        startActivity(intent)
-    }
-
-    private fun updateUsername(uid: String) {
-        userReference.child(uid).child("username").addListenerForSingleValueEvent(
-            object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val fetchedUsername = snapshot.getValue(String::class.java)
-                    if (!fetchedUsername.isNullOrEmpty()) {
-                        username = fetchedUsername
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    // Handle error
-                    Toast.makeText(applicationContext, "Error fetching username", Toast.LENGTH_SHORT).show()
-                }
-            }
-        )
+        loadScores()
     }
 
     private fun loadScores() {
-        val scoresReference = FirebaseDatabase.getInstance().getReference("scores")
         scoresReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val scoreList = mutableListOf<ScoreQuiz>()
@@ -80,20 +53,19 @@ class RankingActivity : ComponentActivity() {
                         scoreList.add(it)
                     }
                 }
-                scores = scoreList
+                scores = scoreList.sortedByDescending { it.score }
             }
 
             override fun onCancelled(error: DatabaseError) {
                 // Handle error
-                Toast.makeText(applicationContext, "Error fetching scores", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterial3Api::class)
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @Composable
-    fun RankingApp(context: Context, auth: FirebaseAuth) {
+    fun RankingApp(context: Context) {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -103,15 +75,15 @@ class RankingActivity : ComponentActivity() {
                 )
             },
             content = {
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
+                    verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    scores.forEach { score ->
-                        ScoreItem(score = score)
+                    item {
+                        ScoreTable(scores = scores)
                     }
                 }
             }
@@ -119,16 +91,31 @@ class RankingActivity : ComponentActivity() {
     }
 
     @Composable
-    fun ScoreItem(score: ScoreQuiz) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = "Username: ${score.username}")
-            Text(text = "Score: ${score.score}")
+    fun ScoreTable(scores: List<ScoreQuiz>) {
+        Column {
+            // Header
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = "Usuario")
+                Text(text = "Puntuación")
+            }
+
+            // Scores
+            scores.forEach { scoreQuiz ->
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = scoreQuiz.username)
+                    Text(text = scoreQuiz.score.toString())
+                }
+            }
         }
     }
 }

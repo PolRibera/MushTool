@@ -30,6 +30,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+
+
 
 private val LightColorScheme = lightColorScheme(
     primary = md_theme_light_primary,
@@ -96,6 +101,8 @@ private val DarkColorScheme = darkColorScheme(
     scrim = md_theme_dark_scrim,
 )
 
+
+
 @Composable
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -120,9 +127,12 @@ fun AppTheme(
         }
     }
 
+
+
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = content
     )
+
 }
