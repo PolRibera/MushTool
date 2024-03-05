@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -98,6 +99,7 @@ class EditarSetaActivity : ComponentActivity() {
                             )
 
                             Button(
+                                colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),
                                 onClick = {
                                     val intent = Intent(context, MainActivity::class.java)
                                     context.startActivity(intent)
@@ -145,6 +147,9 @@ class EditarSetaActivity : ComponentActivity() {
                         label = { Text("Description") }
                     )
                     Button(
+                        colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),modifier = Modifier
+                            .padding(16.dp)
+                            .background(Color(0xFF6B0C0C)),
                         onClick = {
                             val imgPath = imgPathState.value
                             val name = nameState.value
@@ -183,6 +188,7 @@ class EditarSetaActivity : ComponentActivity() {
                             }
 
                         }
+
                     ) {
                         Text("Actualizar seta")
                     }
