@@ -272,9 +272,11 @@ class PostActivity : ComponentActivity() {
                             setaSnapshot.child("warn_level").getValue(Int::class.java)
                         val difficulty =
                             setaSnapshot.child("difficulty").getValue(Int::class.java)
+                        val description =
+                            setaSnapshot.child("description").getValue(String::class.java)
 
-                        if (name != null && sci_name != null && warn_level != null && difficulty != null && imageUrl != null) {
-                            val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty)
+                        if (name != null && sci_name != null && warn_level != null && difficulty != null && imageUrl != null && description != null) {
+                            val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty, description)
                             newSetas.add(seta)
                         }
                     }

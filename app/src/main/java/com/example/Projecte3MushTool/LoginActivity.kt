@@ -103,7 +103,7 @@ class LoginActivity : ComponentActivity() {
 
                     Button(
                         onClick = {
-                                signIn(email, password)
+                            signIn(email, password)
                         },
                         colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),
                         modifier = Modifier.fillMaxWidth()

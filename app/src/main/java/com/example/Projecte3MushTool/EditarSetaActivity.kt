@@ -52,8 +52,9 @@ class EditarSetaActivity : ComponentActivity() {
         val sciName = intent.getStringExtra("sci_name")
         val warnLevel = intent.getIntExtra("warn_level", 0)
         val difficulty = intent.getIntExtra("difficulty", 0)
+        val description = intent.getStringExtra("description")
         setContent {
-            EditarSetaApp(this, imgPath, name, sciName, warnLevel, difficulty)
+            EditarSetaApp(this, imgPath, name, sciName, warnLevel, difficulty,description)
         }
     }
 
@@ -64,13 +65,15 @@ class EditarSetaActivity : ComponentActivity() {
         name: String?,
         sciName: String?,
         warnLevel: Int?,
-        difficulty: Int?
+        difficulty: Int?,
+        description: String?
     ) {
         val imgPathState = remember { mutableStateOf(imgPath ?: "") }
         val nameState = remember { mutableStateOf(name ?: "") }
         val sciNameState = remember { mutableStateOf(sciName ?: "") }
         val warnLevelState = remember { mutableStateOf(warnLevel?.toString() ?: "") }
         val difficultyState = remember { mutableStateOf(difficulty.toString() ?: "") }
+        val descriptionState = remember { mutableStateOf(description ?: "") }
 
 
         Scaffold(
@@ -136,6 +139,11 @@ class EditarSetaActivity : ComponentActivity() {
                         onValueChange = { warnLevelState.value = it },
                         label = { Text("Nivel de advertencia") }
                     )
+                    OutlinedTextField(
+                        value = descriptionState.value,
+                        onValueChange = { descriptionState.value = it },
+                        label = { Text("Description") }
+                    )
                     Button(
                         onClick = {
                             val imgPath = imgPathState.value
@@ -143,6 +151,7 @@ class EditarSetaActivity : ComponentActivity() {
                             val sciName = sciNameState.value
                             val warnLevel = warnLevelState.value.toIntOrNull() ?: 0
                             val difficulty = difficultyState.value.toIntOrNull() ?: 0
+                            val description = descriptionState.value
                             // Obtener el ID de la seta
 
                             // Verificar que todos los campos requeridos estén llenos
@@ -155,6 +164,7 @@ class EditarSetaActivity : ComponentActivity() {
                                 setaReference.child("sci_name").setValue(sciName)
                                 setaReference.child("warn_level").setValue(warnLevel)
                                 setaReference.child("difficulty").setValue(difficulty)
+                                setaReference.child("description").setValue(description)
                                 // Mensaje de éxito
                                 Toast.makeText(
                                     context,
