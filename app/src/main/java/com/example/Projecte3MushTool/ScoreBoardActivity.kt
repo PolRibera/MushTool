@@ -1,9 +1,6 @@
 package com.example.Projecte3MushTool
 
 import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -24,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import java.util.UUID
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 

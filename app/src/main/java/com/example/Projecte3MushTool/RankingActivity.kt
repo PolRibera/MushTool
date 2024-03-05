@@ -3,15 +3,6 @@ package com.example.Projecte3MushTool
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -32,8 +23,7 @@ import com.google.firebase.database.*
 
 class RankingActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
-    private lateinit var userReference: DatabaseReference
-    private var username by mutableStateOf("")
+    private lateinit var scoresReference: DatabaseReference
     private var scores by mutableStateOf<List<ScoreQuiz>>(emptyList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,7 +58,6 @@ class RankingActivity : ComponentActivity() {
 
             override fun onCancelled(error: DatabaseError) {
                 // Handle error
-                Toast.makeText(applicationContext, "Error fetching scores", Toast.LENGTH_SHORT).show()
             }
         })
     }
