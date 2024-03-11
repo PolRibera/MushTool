@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
+    android:background="#FF6B0C0C"
     tools:context=".CrearForoPostActivity">
 
     <TextView
@@ -14,7 +15,8 @@
         android:textSize="24sp"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"/>
 
     <EditText
         android:id="@+id/editTextNuevoPost"
@@ -25,7 +27,9 @@
         android:minLines="5"
         android:gravity="start|top"
         android:layout_below="@id/textViewTitulo"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:textColor="#FFFFFF"
+        android:background="#FF6B0C0C"/>
 
     <Button
         android:id="@+id/buttonPublicar"
@@ -34,6 +38,8 @@
         android:text="Publicar"
         android:layout_below="@id/editTextNuevoPost"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:textColor="#FFFFFF"
+        android:background="#FF6B0C0C"/>
 
 </RelativeLayout>

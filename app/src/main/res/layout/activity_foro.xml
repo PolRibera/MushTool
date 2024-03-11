@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#FF6B0C0C">
 
     <!-- Nuevo botón para crear un nuevo post -->
     <Button
@@ -13,7 +14,8 @@
         android:text="Crear Post"
         android:layout_gravity="center"
         android:textSize="14sp"
-        android:textColor="@android:color/white"
+        android:textColor="#FFFFFF"
+        android:background="#FF6B0C0C"
         android:layout_marginBottom="16dp"/>
 
     <ScrollView
@@ -21,13 +23,15 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:background="#FF6B0C0C"
         android:layout_marginTop="16dp">
 
         <LinearLayout
             android:id="@+id/layoutPosts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"/>
+            android:orientation="vertical"
+            android:background="#FF6B0C0C"/>
 
     </ScrollView>
 </LinearLayout>

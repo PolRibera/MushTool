@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#FF6B0C0C">
 
     <EditText
         android:id="@+id/editTextRespuesta"
@@ -12,6 +13,8 @@
         android:inputType="textMultiLine"
         android:minLines="4"
         android:gravity="top"
+        android:textColor="#FFFFFF"
+        android:background="#FF6B0C0C"
         android:layout_marginBottom="16dp" />
 
     <Button
@@ -20,6 +23,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/editTextRespuesta"
         android:layout_centerHorizontal="true"
-        android:text="Enviar Respuesta" />
+        android:text="Enviar Respuesta"
+        android:textColor="#FFFFFF"
+        android:background="#FF6B0C0C"/>
 
 </RelativeLayout>
