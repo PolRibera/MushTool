@@ -1,5 +1,6 @@
 package com.example.Projecte3MushTool
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 class LoginActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
@@ -101,7 +103,7 @@ class LoginActivity : ComponentActivity() {
 
                     Button(
                         onClick = {
-                                signIn(email, password)
+                            signIn(email, password)
                         },
                         colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),
                         modifier = Modifier.fillMaxWidth()

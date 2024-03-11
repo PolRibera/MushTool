@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -52,8 +53,9 @@ class EditarSetaActivity : ComponentActivity() {
         val sciName = intent.getStringExtra("sci_name")
         val warnLevel = intent.getIntExtra("warn_level", 0)
         val difficulty = intent.getIntExtra("difficulty", 0)
+        val description = intent.getStringExtra("description")
         setContent {
-            EditarSetaApp(this, imgPath, name, sciName, warnLevel, difficulty)
+            EditarSetaApp(this, imgPath, name, sciName, warnLevel, difficulty,description)
         }
     }
 
@@ -64,13 +66,15 @@ class EditarSetaActivity : ComponentActivity() {
         name: String?,
         sciName: String?,
         warnLevel: Int?,
-        difficulty: Int?
+        difficulty: Int?,
+        description: String?
     ) {
         val imgPathState = remember { mutableStateOf(imgPath ?: "") }
         val nameState = remember { mutableStateOf(name ?: "") }
         val sciNameState = remember { mutableStateOf(sciName ?: "") }
         val warnLevelState = remember { mutableStateOf(warnLevel?.toString() ?: "") }
         val difficultyState = remember { mutableStateOf(difficulty.toString() ?: "") }
+        val descriptionState = remember { mutableStateOf(description ?: "") }
 
 
         Scaffold(
@@ -95,6 +99,7 @@ class EditarSetaActivity : ComponentActivity() {
                             )
 
                             Button(
+                                colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),
                                 onClick = {
                                     val intent = Intent(context, MainActivity::class.java)
                                     context.startActivity(intent)
@@ -136,13 +141,22 @@ class EditarSetaActivity : ComponentActivity() {
                         onValueChange = { warnLevelState.value = it },
                         label = { Text("Nivel de advertencia") }
                     )
+                    OutlinedTextField(
+                        value = descriptionState.value,
+                        onValueChange = { descriptionState.value = it },
+                        label = { Text("Description") }
+                    )
                     Button(
+                        colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),modifier = Modifier
+                            .padding(16.dp)
+                            .background(Color(0xFF6B0C0C)),
                         onClick = {
                             val imgPath = imgPathState.value
                             val name = nameState.value
                             val sciName = sciNameState.value
                             val warnLevel = warnLevelState.value.toIntOrNull() ?: 0
                             val difficulty = difficultyState.value.toIntOrNull() ?: 0
+                            val description = descriptionState.value
                             // Obtener el ID de la seta
 
                             // Verificar que todos los campos requeridos estén llenos
@@ -155,6 +169,7 @@ class EditarSetaActivity : ComponentActivity() {
                                 setaReference.child("sci_name").setValue(sciName)
                                 setaReference.child("warn_level").setValue(warnLevel)
                                 setaReference.child("difficulty").setValue(difficulty)
+                                setaReference.child("description").setValue(description)
                                 // Mensaje de éxito
                                 Toast.makeText(
                                     context,
@@ -173,6 +188,7 @@ class EditarSetaActivity : ComponentActivity() {
                             }
 
                         }
+
                     ) {
                         Text("Actualizar seta")
                     }

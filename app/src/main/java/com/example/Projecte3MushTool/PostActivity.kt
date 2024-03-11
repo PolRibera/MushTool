@@ -224,11 +224,12 @@ class PostActivity : ComponentActivity() {
             val locationString = "${location.latitude};${location.longitude}"
             val user = auth.currentUser
             val uid = user?.uid
+            val key = postReference.push().key
             // Crea el objeto Post con la imagen, el comentario, la ubicación y otros detalles necesarios
-            val post = Post(uid.toString(),imgPath, comentario, sciNameSeta, locationString)
+            val post = Post(key.toString(),uid.toString(),imgPath, comentario, sciNameSeta, locationString,"")
 
             // Guarda el post en la base de datos Firebase
-            postReference.push().setValue(post)
+            postReference.child(post.key).setValue(post)
                 .addOnSuccessListener {
                     Toast.makeText(context, "Post añadido correctamente", Toast.LENGTH_SHORT).show()
                 }
@@ -271,9 +272,11 @@ class PostActivity : ComponentActivity() {
                             setaSnapshot.child("warn_level").getValue(Int::class.java)
                         val difficulty =
                             setaSnapshot.child("difficulty").getValue(Int::class.java)
+                        val description =
+                            setaSnapshot.child("description").getValue(String::class.java)
 
-                        if (name != null && sci_name != null && warn_level != null && difficulty != null && imageUrl != null) {
-                            val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty)
+                        if (name != null && sci_name != null && warn_level != null && difficulty != null && imageUrl != null && description != null) {
+                            val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty, description)
                             newSetas.add(seta)
                         }
                     }

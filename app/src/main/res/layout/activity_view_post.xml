@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#FF6B0C0C">
+
+    <!-- TextView para mostrar el post -->
+    <TextView
+        android:id="@+id/textViewPost"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textColor="#000000"
+        android:background="@drawable/post_background"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Agregar un ScrollView para los comentarios -->
+    <ScrollView
+        android:id="@+id/scrollViewComments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewPost"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:id="@+id/commentsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <!-- EditText y botón para agregar comentario -->
+    <LinearLayout
+        android:id="@+id/layoutAddComment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editTextComment"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:hint="Escribe un comentario"
+            android:inputType="text"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/buttonAddComment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Comentar"
+            android:textColor="#FFFFFF"
+            android:background="#FF6B0C0C" />
+    </LinearLayout>
+
+</RelativeLayout>

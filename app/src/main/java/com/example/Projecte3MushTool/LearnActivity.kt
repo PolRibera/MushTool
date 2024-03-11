@@ -12,6 +12,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.example.lemonade.ui.theme.AppTheme
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -33,8 +35,7 @@ import kotlinx.coroutines.launch
 class LearnActivity : ComponentActivity() {
     private lateinit var Boletreference: DatabaseReference
     private var setasGroupedByDifficulty: Map<Int, List<Seta>> = emptyMap()
-
-
+    private lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -78,17 +79,17 @@ class LearnActivity : ComponentActivity() {
                     val setasDifficulty2 = mutableListOf<Seta>()
                     val setasDifficulty3 = mutableListOf<Seta>()
 
-
                     for (setaSnapshot in dataSnapshot.children) {
                         val imageUrl = setaSnapshot.child("imageUrl").getValue(String::class.java)
                         val name = setaSnapshot.child("name").getValue(String::class.java)
                         val sci_name = setaSnapshot.child("sci_name").getValue(String::class.java)
                         val warn_level = setaSnapshot.child("warn_level").getValue(Int::class.java)
                         val difficulty = setaSnapshot.child("difficulty").getValue(Int::class.java)
+                        val description = setaSnapshot.child("description").getValue(String::class.java)
 
 
-                        if (imageUrl != null && name != null && sci_name != null && warn_level != null && difficulty != null) {
-                            val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty)
+                        if (imageUrl != null && name != null && sci_name != null && warn_level != null && difficulty != null && description != null) {
+                            val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty, description)
                             when (difficulty) {
                                 1 -> setasDifficulty1.add(seta)
                                 2 -> setasDifficulty2.add(seta)
@@ -117,7 +118,7 @@ class LearnActivity : ComponentActivity() {
 
 
                 override fun onCancelled(databaseError: DatabaseError) {
-                    // Maneja posibles errores.
+                    // Handle possible errors.
                 }
             })
         }
@@ -125,7 +126,8 @@ class LearnActivity : ComponentActivity() {
 
         Scaffold(
             topBar = {
-                TopAppBar(
+                @OptIn(ExperimentalMaterial3Api::class)
+                (TopAppBar(
                     modifier = Modifier.background(Color(0xFF6B0C0C)),
                     title = { },
                     actions = {
@@ -145,9 +147,13 @@ class LearnActivity : ComponentActivity() {
 
                             Button(
                                 onClick = {
-                                    val intent = Intent(context, MainActivity::class.java)
-                                    context.startActivity(intent)
+                                    auth.uid?.let {
+                                        FirebaseAuth.getInstance().signOut()
+                                        val intent = Intent(context, MainActivity::class.java)
+                                        context.startActivity(intent)
+                                    }
                                 },
+                                colors = ButtonDefaults.buttonColors(Color(0xFF6B0C0C)),
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically)
                                     .background(Color(0xFF6B0C0C))
@@ -160,7 +166,7 @@ class LearnActivity : ComponentActivity() {
                             }
                         }
                     }
-                )
+                ))
             },
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
@@ -250,7 +256,7 @@ class LearnActivity : ComponentActivity() {
     @Composable
     fun DefaultPreview() {
         AppTheme {
-            TestGameApp(LocalContext.current)
+             TestGameApp(LocalContext.current) // You may need to adjust this line
         }
     }
 }

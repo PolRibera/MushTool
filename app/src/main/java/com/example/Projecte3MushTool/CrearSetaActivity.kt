@@ -3,6 +3,7 @@ package com.example.Projecte3MushTool
 import androidx.compose.foundation.background
 import androidx.compose.material3.ExperimentalMaterial3Api
 import android.Manifest
+import android.content.ClipDescription
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -119,9 +120,10 @@ class CrearSetaActivity : ComponentActivity() {
         name: String,
         sci_name: String,
         warn_level: Int,
-        difficulty: Int
+        difficulty: Int,
+        description: String
     ) {
-        val seta = Seta(img_path, name, sci_name, warn_level, difficulty)
+        val seta = Seta(img_path, name, sci_name, warn_level, difficulty, description)
         Boletreference.child(sci_name).setValue(seta)
             .addOnSuccessListener {
                 Toast.makeText(this, "Seta añadida correctamente", Toast.LENGTH_SHORT).show()
@@ -138,6 +140,7 @@ class CrearSetaActivity : ComponentActivity() {
         var sciName by remember { mutableStateOf("") }
         var warnLevel by remember { mutableStateOf("") }
         var difficulty by remember { mutableStateOf("") }
+        var description by remember { mutableStateOf("") }
 
         Scaffold(
             topBar = {
@@ -215,6 +218,13 @@ class CrearSetaActivity : ComponentActivity() {
                             Text("Dificultad (0-10)")
                         }
                     )
+                    TextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = {
+                            Text("Descripción de la seta")
+                        }
+                    )
                     Button(
 
 
@@ -253,7 +263,8 @@ class CrearSetaActivity : ComponentActivity() {
                                 name,
                                 sciName,
                                 warnLevel.toInt(),
-                                difficulty.toInt()
+                                difficulty.toInt(),
+                                description
                             )
                             val intent = Intent(context, BusquedaActivity::class.java)
                             context.startActivity(intent)

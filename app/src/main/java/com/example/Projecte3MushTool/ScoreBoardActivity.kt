@@ -1,9 +1,11 @@
 package com.example.Projecte3MushTool
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,13 +21,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import java.util.UUID
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 
 class ScoreBoardActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var userReference: DatabaseReference
     private var username by mutableStateOf("")
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val score = intent.getIntExtra("score", 0)
@@ -65,6 +70,7 @@ class ScoreBoardActivity : ComponentActivity() {
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun ScoreBoard(score: Int) {
         val username = remember { mutableStateOf("") }
@@ -85,7 +91,11 @@ class ScoreBoardActivity : ComponentActivity() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = {
-                saveScoreToDatabase(auth.currentUser?.uid ?: "", score, username.value)
+                saveScoreToDatabase(
+                    auth.currentUser?.uid ?: "",
+                    score,
+                    username.value
+                )
             }) {
                 Text(text = "Save Score")
             }
@@ -103,17 +113,23 @@ class ScoreBoardActivity : ComponentActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun saveScoreToDatabase(uid: String, score: Int, username: String) {
-        // Create an instance of ScoreQuiz
-        val scoreQuiz = ScoreQuiz(uid, score, username)
+        // Get the current date and time
+        val currentDateTime = LocalDateTime.now()
+        // Format the date and time as "year-month-day hour:minute:second"
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val formattedDateTime = currentDateTime.format(formatter)
 
-        // Get a reference to the scores in the database
+        // Create an instance of ScoreQuiz
+        val scoreQuiz = ScoreQuiz(uid, username, score, formattedDateTime)
+        // Get a reference to the "scores" node in the database
         val scoresReference = FirebaseDatabase.getInstance().getReference("scores")
 
-        // Generate a unique id for the attempt
-        val id_attempt = UUID.randomUUID().toString()
+        // Generate a unique id for the score
+        val scoreId = scoresReference.push().key ?: ""
 
-        // Save the ScoreQuiz instance to the database with the new key
-        scoresReference.child(id_attempt).setValue(scoreQuiz)
+        // Save the ScoreQuiz instance to the database under the unique scoreId
+        scoresReference.child(scoreId).setValue(scoreQuiz)
     }
 }
