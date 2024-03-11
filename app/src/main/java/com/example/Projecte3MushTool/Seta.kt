@@ -5,5 +5,6 @@ data class Seta(
     var name: String,
     var sci_name: String,
     var warn_level: Int,
-    var difficulty: Int
+    var difficulty: Int,
+    var description: String,
 )

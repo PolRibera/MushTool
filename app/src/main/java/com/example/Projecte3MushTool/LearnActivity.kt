@@ -85,10 +85,11 @@ class LearnActivity : ComponentActivity() {
                         val sci_name = setaSnapshot.child("sci_name").getValue(String::class.java)
                         val warn_level = setaSnapshot.child("warn_level").getValue(Int::class.java)
                         val difficulty = setaSnapshot.child("difficulty").getValue(Int::class.java)
+                        val description = setaSnapshot.child("description").getValue(String::class.java)
 
 
-                        if (imageUrl != null && name != null && sci_name != null && warn_level != null && difficulty != null) {
-                            val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty)
+                        if (imageUrl != null && name != null && sci_name != null && warn_level != null && difficulty != null && description != null) {
+                            val seta = Seta(imageUrl, name, sci_name, warn_level, difficulty, description)
                             when (difficulty) {
                                 1 -> setasDifficulty1.add(seta)
                                 2 -> setasDifficulty2.add(seta)
