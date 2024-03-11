@@ -11,11 +11,14 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
+
+
 class ViewPostActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     private lateinit var postId: String
     private lateinit var commentsLayout: LinearLayout
+    private lateinit var userReference: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +26,7 @@ class ViewPostActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
+        userReference = FirebaseDatabase.getInstance().reference.child("Usuari")
 
         postId = intent.getStringExtra("postId") ?: ""
 
@@ -49,105 +53,120 @@ class ViewPostActivity : AppCompatActivity() {
                 val post = snapshot.getValue(ForoPost::class.java)
                 if (post != null) {
                     val userId = post.userId
-                    val displayUserId = userId
-                    findViewById<TextView>(R.id.textViewPost).text = "$displayUserId\n${post.text}"
-                    loadComments(postId) // Cargar los comentarios asociados a este post
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("ViewPostActivity", "Error al cargar la publicación: ${error.message}")
-            }
-        })
-    }
-
-    private fun loadComments(postId: String) {
-        val commentsRef = database.child("ForoPost").child(postId).child("comments")
-        commentsRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                commentsLayout.removeAllViews() // Limpiar el diseño de comentarios antes de agregar nuevos comentarios
-                for (commentSnapshot in snapshot.children) {
-                    val comment = commentSnapshot.getValue(Comment::class.java)
-                    if (comment != null) {
-                        val userId = comment.userId
-                        val commentText = comment.text
-
-                        // Crear una vista para mostrar el comentario y el botón de respuesta
-                        val commentContainer = LinearLayout(this@ViewPostActivity)
-                        commentContainer.orientation = LinearLayout.VERTICAL
-
-                        val commentTextView = TextView(this@ViewPostActivity)
-                        if (userId == auth.currentUser?.uid) {
-                            // Si el comentario fue realizado por el usuario actual, añadir un prefijo para distinguirlo
-                            commentTextView.text = "Tú: $commentText"
-                        } else {
-                            commentTextView.text = "$userId:$commentText"
-                        }
-
-                        // Mostrar las respuestas al comentario
-                        val respuestasRef = commentSnapshot.child("respuestas")
-                        for (respuestaSnapshot in respuestasRef.children) {
-                            // Acceder a cada campo de la respuesta individualmente
-                            val userId = respuestaSnapshot.child("userId").getValue(String::class.java)
-                            val respuestaText = respuestaSnapshot.child("text").getValue(String::class.java)
-
-                            // Verificar si los campos son no nulos o vacíos antes de mostrar la respuesta
-                            if (!userId.isNullOrEmpty() && !respuestaText.isNullOrEmpty()) {
-                                // Construir una cadena que represente la respuesta
-                                val respuestaString = "$userId:$respuestaText"
-
-                                // Crear un TextView para mostrar la respuesta
-                                val respuestaTextView = TextView(this@ViewPostActivity)
-                                respuestaTextView.text = respuestaString
-                                commentContainer.addView(respuestaTextView)
-                            }
-                        }
-
-
-                        val replyButton = Button(this@ViewPostActivity)
-                        replyButton.text = "Responder"
-                        replyButton.setOnClickListener {
-                            // Iniciar la actividad de respuesta al comentario
-                            val intent = Intent(this@ViewPostActivity, ResponderComentarioActivity::class.java)
-                            intent.putExtra("postId", postId)
-                            intent.putExtra("commentId", comment.id)
-                            startActivity(intent)
-                        }
-
-                        commentContainer.addView(commentTextView)
-                        commentContainer.addView(replyButton)
-
-                        commentsLayout.addView(commentContainer)
+                    getUserUsername(userId) { username ->
+                        val displayUserName = username ?: userId
+                        findViewById<TextView>(R.id.textViewPost).text = "$displayUserName\n${post.text}"
+                        loadComments(postId) // Load comments associated with this post
                     }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("ViewPostActivity", "Error al cargar los comentarios: ${error.message}")
+                Log.e("ViewPostActivity", "Error loading post: ${error.message}")
             }
         })
     }
 
 
+    private fun loadComments(postId: String) {
+        val commentsRef = database.child("ForoPost").child(postId).child("comments")
+        commentsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                commentsLayout.removeAllViews() // Clear comments layout before adding new comments
+                for (commentSnapshot in snapshot.children) {
+                    val comment = commentSnapshot.getValue(Comment::class.java)
+                    if (comment != null) {
+                        val userId = comment.userId
+                        getUserUsername(userId) { username ->
+                            val commentText = comment.text
+                            val displayUserName = if (userId == auth.currentUser?.uid) {
+                                "Tú"
+                            } else {
+                                username ?: userId
+                            }
+
+                            val commentContainer = LinearLayout(this@ViewPostActivity)
+                            val commentTextView = TextView(this@ViewPostActivity)
+                            commentTextView.text = "$displayUserName: $commentText"
+                            commentContainer.addView(commentTextView)
+
+                            val replyButton = Button(this@ViewPostActivity)
+                            replyButton.text = "Responder"
+                            replyButton.setOnClickListener {
+                                // Start the activity to reply to the comment
+                                val intent = Intent(this@ViewPostActivity, ResponderComentarioActivity::class.java)
+                                intent.putExtra("postId", postId)
+                                intent.putExtra("commentId", comment.id)
+                                startActivity(intent)
+                            }
+                            val repliesRef = commentSnapshot.child("respuestas")
+
+
+                            commentContainer.addView(replyButton) // Add the reply button to the container
+                            commentsLayout.addView(commentContainer)
+                            for (replySnapshot in repliesRef.children) {
+                                // Extract reply details
+                                val replyUserId = replySnapshot.child("userId").getValue(String::class.java)
+                                val replyText = replySnapshot.child("text").getValue(String::class.java)
+
+
+                                // Display the reply in the UI
+                                val replyTextView = TextView(this@ViewPostActivity)
+                                val replyUser = if (replyUserId == auth.currentUser?.uid) {
+                                    "Tú"
+                                } else {
+                                    username ?: replyUserId
+                                }
+
+                                replyTextView.text = "$replyUser: $replyText"
+                                commentsLayout.addView(replyTextView)
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("ViewPostActivity", "Error loading comments: ${error.message}")
+            }
+        })
+    }
+
+    private fun getUserUsername(userId: String, callback: (String?) -> Unit) {
+        userReference.child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val user = snapshot.getValue(User::class.java)
+                callback(user?.username)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("ViewPostActivity", "Error loading user: ${error.message}")
+                callback(null)
+            }
+        })
+    }
 
     private fun addComment(commentText: String) {
         val userId = auth.currentUser?.uid
         if (userId != null) {
             val commentId = database.child("ForoPost").child(postId).child("comments").push().key
             val comment = Comment(commentId, userId, commentText)
-database.child("ForoPost").child(postId).child("comments").child(commentId!!).setValue(comment)
+            database.child("ForoPost").child(postId).child("comments").child(commentId!!).setValue(comment)
                 .addOnSuccessListener {
-                    // El comentario se guardó exitosamente
-                    Log.d("ViewPostActivity", "Comentario guardado en Firebase")
+                    // Comment saved successfully
+                    Log.d("ViewPostActivity", "Comment saved to Firebase")
                 }
                 .addOnFailureListener { e ->
-                    // Error al guardar el comentario
-                    Log.e("ViewPostActivity", "Error al guardar el comentario: ${e.message}")
+                    // Error saving comment
+                    Log.e("ViewPostActivity", "Error saving comment: ${e.message}")
                 }
-            // Actualizar la vista para mostrar el nuevo comentario
-            val commentTextView = TextView(this@ViewPostActivity)
-            commentTextView.text = "$userId: $commentText"
-            commentsLayout.addView(commentTextView)
+            // Update the view to display the new comment
+            getUserUsername(userId) { username ->
+                val displayUserName = username ?: userId
+                val commentTextView = TextView(this@ViewPostActivity)
+                commentTextView.text = "$displayUserName: $commentText"
+                commentsLayout.addView(commentTextView)
+            }
         }
     }
 }

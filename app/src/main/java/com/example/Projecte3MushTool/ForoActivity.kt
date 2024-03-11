@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
+
 class ForoActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
@@ -27,7 +28,6 @@ class ForoActivity : ComponentActivity() {
 
         userId = auth.currentUser?.uid ?: ""
 
-
         val buttonCrearPost = findViewById<Button>(R.id.buttonCrearPost)
         layoutPosts = findViewById(R.id.layoutPosts)
 
@@ -35,7 +35,7 @@ class ForoActivity : ComponentActivity() {
             startActivity(Intent(this, CrearForoPostActivity::class.java))
         }
 
-        // Cambios en ValueEventListener para mostrar todos los posts
+        // ValueEventListener to fetch posts and usernames
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 layoutPosts.removeAllViews()
@@ -48,7 +48,7 @@ class ForoActivity : ComponentActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("ForoActivity", "Error en la base de datos: ${error.message}")
+                Log.e("ForoActivity", "Database error: ${error.message}")
             }
         })
     }
@@ -58,28 +58,22 @@ class ForoActivity : ComponentActivity() {
         container.orientation = LinearLayout.VERTICAL
 
         val textViewUserName = TextView(this@ForoActivity)
-        // Agregar nombre de usuario
-        textViewUserName.text = foroPost.userId
+        getUserDisplayName(foroPost.userId, textViewUserName)
 
         val textViewPost = TextView(this@ForoActivity)
-        // Agregar el texto del post
         textViewPost.text = foroPost.text
 
-        // Añadir borde al contenedor
         container.background = ContextCompat.getDrawable(this@ForoActivity, R.drawable.post_border)
 
-        // Agregar OnClickListener al contenedor para abrir ViewPostActivity
         container.setOnClickListener {
             val intent = Intent(this@ForoActivity, ViewPostActivity::class.java)
             intent.putExtra("postId", foroPost.id)
             startActivity(intent)
         }
 
-        // Añadir botones de editar y borrar solo si el usuario actual es el creador del post
         if (auth.currentUser?.uid == foroPost.userId) {
             val editButton = Button(this@ForoActivity)
-            editButton.text = "Editar"
-            // Agregar OnClickListener para editar
+            editButton.text = "Edit"
             editButton.setOnClickListener {
                 val intent = Intent(this@ForoActivity, EditForoPostActivity::class.java)
                 intent.putExtra("postId", foroPost.id)
@@ -87,14 +81,13 @@ class ForoActivity : ComponentActivity() {
             }
 
             val deleteButton = Button(this@ForoActivity)
-            deleteButton.text = "Borrar"
-            // Agregar OnClickListener para borrar
+            deleteButton.text = "Delete"
             deleteButton.setOnClickListener {
                 val postId = foroPost.id
                 if (postId != null) {
                     database.child(postId).removeValue()
                 }
-                Toast.makeText(this@ForoActivity, "Borrado exitosamente", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ForoActivity, "Deleted successfully", Toast.LENGTH_SHORT).show()
             }
 
             container.addView(editButton)
@@ -106,4 +99,20 @@ class ForoActivity : ComponentActivity() {
 
         layoutPosts.addView(container)
     }
+
+    private fun getUserDisplayName(userId: String, textViewUserName: TextView) {
+        val userReference = FirebaseDatabase.getInstance().reference.child("Usuari")
+        userReference.child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val user = dataSnapshot.getValue(User::class.java)
+                val username = user?.username ?: "Unknown"
+                textViewUserName.text = "Username: $username"
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("ForoActivity", "Error getting username: ${error.message}")
+            }
+        })
+    }
 }
+

@@ -152,15 +152,17 @@ class BusquedaActivity : ComponentActivity() {
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Button(
-                        onClick = {
-                            val intent = Intent(context, CrearSetaActivity::class.java)
-                            context.startActivity(intent)
-                        },
-                        modifier = Modifier
-                            .background(Color(0xFF6B0C0C))
-                    ) {
-                        Text("Añadir seta")
+                    if(isAdmin) {
+                        Button(
+                            onClick = {
+                                val intent = Intent(context, CrearSetaActivity::class.java)
+                                context.startActivity(intent)
+                            },
+                            modifier = Modifier
+                                .background(Color(0xFF6B0C0C))
+                        ) {
+                            Text("Añadir seta")
+                        }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     LazyColumn {
