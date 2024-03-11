@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    android:background="#FF6B0C0C"
+    android:background="#FFFFFF"
     tools:context=".CrearForoPostActivity">
 
     <TextView
@@ -16,7 +16,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"
         android:textStyle="bold"
-        android:textColor="#FFFFFF"/>
+        android:textColor="#000000"/>
 
     <EditText
         android:id="@+id/editTextNuevoPost"
