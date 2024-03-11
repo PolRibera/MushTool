@@ -27,6 +27,7 @@ class ForoActivity : ComponentActivity() {
 
         userId = auth.currentUser?.uid ?: ""
 
+
         val buttonCrearPost = findViewById<Button>(R.id.buttonCrearPost)
         layoutPosts = findViewById(R.id.layoutPosts)
 

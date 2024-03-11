@@ -71,6 +71,9 @@
             android:exported="false"
             />
 
+        <activity android:name=".WeatherActivity"
+            android:exported="false"
+            />
 
         <activity
             android:name=".MapaActivity"
@@ -83,7 +86,6 @@
         <activity android:name=".CrearForoPostActivity"
             android:exported="false"
             />
-
 
         <activity
             android:name=".ConfigActivity"
