@@ -31,7 +31,7 @@ class ForoActivity : ComponentActivity() {
         layoutPosts = findViewById(R.id.layoutPosts)
 
         buttonCrearPost.setOnClickListener {
-            startActivity(Intent(this, CrearPostActivity::class.java))
+            startActivity(Intent(this, CrearForoPostActivity::class.java))
         }
 
         // Cambios en ValueEventListener para mostrar todos los posts

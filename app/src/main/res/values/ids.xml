@@ -8,4 +8,5 @@
     <item name="commentsLayout" type="id" />
     <item name="buttonPublicar" type="id" />
     <item name="buttonGuardar" type="id" />
+    <item name="buttonCrearPost" type="id" />
 </resources>

@@ -10,7 +10,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
-class CrearPostActivity : AppCompatActivity() {
+class CrearForoPostActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
@@ -57,5 +57,4 @@ class CrearPostActivity : AppCompatActivity() {
             Toast.makeText(this, "Debes ingresar un texto para publicar un post.", Toast.LENGTH_SHORT).show()
         }
     }
-
 }

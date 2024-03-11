@@ -80,7 +80,7 @@
             android:name=".PlatsActivity"
             android:exported="false" />
 
-        <activity android:name=".CrearPostActivity"
+        <activity android:name=".CrearForoPostActivity"
             android:exported="false"
             />
 
