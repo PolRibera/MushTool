@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -123,6 +124,9 @@ class MapaActivity : ComponentActivity() {
 
     @Composable
     fun FirebasePostListener(mapView: MapView, context: Context) {
+        // Get the uid of the current user
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
         // Listener de Firebase para obtener los posts y agregar marcadores al mapa
         postReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -140,34 +144,38 @@ class MapaActivity : ComponentActivity() {
                 }
                 mapView.overlays.add(mMyLocationOverlay)
                 for (postSnapshot in dataSnapshot.children) {
-                    val locationString = postSnapshot.child("location").getValue(String::class.java)
-                    val comment = postSnapshot.child("comentario").getValue(String::class.java)
-                    val mushroomType = postSnapshot.child("setaPost").getValue(String::class.java)
+                    // Get the uid of the post
+                    val postUserId = postSnapshot.child("uid").getValue(String::class.java)
 
-                    if (locationString != null) {
-                        val (latitude, longitude) = locationString.split(";")
-                        val lat = latitude.toDouble()
-                        val lon = longitude.toDouble()
+                    // Check if the uid of the post matches the uid of the current user
+                    if (postUserId == currentUserId) {
+                        val locationString = postSnapshot.child("location").getValue(String::class.java)
+                        val comment = postSnapshot.child("comentario").getValue(String::class.java)
+                        val mushroomType = postSnapshot.child("setaPost").getValue(String::class.java)
 
-                        // Agregar marcador al mapa
-                        val location = GeoPoint(lat, lon)
-                        val marker = Marker(mapView)
-                        marker.position = location
-                        marker.title = mushroomType // Asignar el comentario al título del marcador
-                        marker.snippet = comment // Asignar el tipo de seta al snippet del marcador
-                        mapView.overlays.add(marker)
+                        if (locationString != null) {
+                            val (latitude, longitude) = locationString.split(";")
+                            val lat = latitude.toDouble()
+                            val lon = longitude.toDouble()
 
-                        points.add(location)
+                            // Agregar marcador al mapa
+                            val location = GeoPoint(lat, lon)
+                            val marker = Marker(mapView)
+                            marker.position = location
+                            marker.title = mushroomType // Asignar el comentario al título del marcador
+                            marker.snippet = comment // Asignar el tipo de seta al snippet del marcador
+                            mapView.overlays.add(marker)
+
+                            points.add(location)
+                        }
                     }
                 }
-
 
                 if (points.isNotEmpty()) {
                     // Calcular el nivel de zoom necesario para mostrar todos los puntos
                     val metersPerPixel = calculateMetersPerPixel(mapView)
                     val zoomLevel = calculateZoomLevel(metersPerPixel, mapView.width)
                     mapView.controller.setZoom(zoomLevel)
-
                 }
 
                 // Refrescar el mapa para que se muestren los marcadores
