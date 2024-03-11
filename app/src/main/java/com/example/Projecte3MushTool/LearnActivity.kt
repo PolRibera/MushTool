@@ -56,22 +56,8 @@ class LearnActivity : ComponentActivity() {
         var currentQuestionIndex by remember { mutableStateOf(0) }
         var score by remember { mutableStateOf(0) }
         var desiredDifficulty by remember { mutableStateOf(1) }
-        var tiempoRestante by remember { mutableStateOf(5000L) } // Tiempo inicial en milisegundos (5 segundos)
-        var showTimer by remember { mutableStateOf("Tiempo restante: ${tiempoRestante / 1000} s") }
 
-        val countDownTimer = object: CountDownTimer(10000, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                tiempoRestante = millisUntilFinished
-                showTimer = "Tiempo restante: ${tiempoRestante / 1000} s"
-            }
 
-            override fun onFinish() {
-                // The counter reached zero, treat as a failed response
-                val intent = Intent(context, ScoreBoardActivity::class.java)
-                intent.putExtra("score", score)
-                context.startActivity(intent)
-            }
-        }
         LaunchedEffect(true) {
             Boletreference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
