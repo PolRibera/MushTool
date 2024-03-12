@@ -93,10 +93,12 @@ class BusquedaActivity : ComponentActivity() {
                         val sci_name = setaSnapshot.child("sci_name").getValue(String::class.java)
                         val warn_level = setaSnapshot.child("warn_level").getValue(Int::class.java)
                         val difficulty = setaSnapshot.child("difficulty").getValue(Int::class.java)
-                        val description = setaSnapshot.child("description").getValue(String::class.java)
+                        val description =
+                            setaSnapshot.child("description").getValue(String::class.java)
 
                         if (name != null && sci_name != null && warn_level != null && difficulty != null && imageUrl != null && description != null) {
-                            val seta = Seta(imageUrl,name, sci_name, warn_level, difficulty, description)
+                            val seta =
+                                Seta(imageUrl, name, sci_name, warn_level, difficulty, description)
                             newSetas.add(seta)
                         }
                     }
@@ -134,7 +136,8 @@ class BusquedaActivity : ComponentActivity() {
                             Button(
                                 onClick = {
                                     val intent = Intent(context, MainActivity::class.java)
-                                    context.startActivity(intent) },
+                                    context.startActivity(intent)
+                                },
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically)
                                     .background(Color(0xFF6B0C0C))
@@ -151,21 +154,25 @@ class BusquedaActivity : ComponentActivity() {
             },
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
+
                 Column(modifier = Modifier.padding(16.dp)) {
-                    if(isAdmin) {
-                        Button(
-                            onClick = {
-                                val intent = Intent(context, CrearSetaActivity::class.java)
-                                context.startActivity(intent)
-                            },
-                            modifier = Modifier
-                                .background(Color(0xFF6B0C0C))
-                        ) {
-                            Text("Añadir seta")
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
                     LazyColumn {
+                        item {
+                            if (isAdmin) {
+                                Button(
+                                    onClick = {
+                                        val intent = Intent(context, CrearSetaActivity::class.java)
+                                        context.startActivity(intent)
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                        .background(Color(0xFF6B0C0C))
+                                ) {
+                                    Text("Añadir seta")
+                                }
+                            }
+                        }
                         items(setasState) { seta ->
                             Row(
                                 modifier = Modifier.clickable {
@@ -181,7 +188,7 @@ class BusquedaActivity : ComponentActivity() {
                                 Column() {
                                     Text(text = "Nombre cientifico: " + seta.sci_name)
                                     Text(text = "Nombre comun: " + seta.name)
-                                    if(isAdmin) {
+                                    if (isAdmin) {
                                         Row {
                                             Button(onClick = {
                                                 selectedSeta = seta
@@ -298,11 +305,13 @@ class BusquedaActivity : ComponentActivity() {
 
 
 
-    @Preview(showBackground = true)
-    @Composable
-    fun DefaultPreview() {
-        AppTheme {
-            BusquedaApp(LocalContext.current)
+
+        @Preview(showBackground = true)
+        @Composable
+        fun DefaultPreview() {
+            AppTheme {
+                BusquedaApp(LocalContext.current)
+            }
         }
     }
-}
+
